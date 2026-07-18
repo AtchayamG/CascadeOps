@@ -1,6 +1,6 @@
 {
-  "active_milestone": "M5_PUBLICATION",
-  "status": "in_progress",
+  "active_milestone": "M9_SUBMITTED",
+  "status": "complete",
   "gates": {
     "rules_verified": true,
     "eligibility_confirmed": true,
@@ -20,14 +20,14 @@
     "public_repository": true,
     "public_app": true,
     "demo_video": true,
-    "devpost_submission": false
+    "devpost_submission": true
   },
   "submission": {
     "category": "Work & Productivity",
-    "devpost_url": null,
-    "youtube_url": null,
+    "devpost_url": "https://devpost.com/software/cascadeops",
+    "youtube_url": "https://youtu.be/eNGNzNmANMs",
     "github_url": "https://github.com/AtchayamG/CascadeOps",
     "public_app_url": "https://atchayamg.github.io/CascadeOps/"
   },
-  "last_updated": "2026-07-19T00:35:00+05:30"
+  "last_updated": "2026-07-19T00:49:42+05:30"
 }

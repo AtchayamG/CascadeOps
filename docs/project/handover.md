@@ -2,7 +2,15 @@
 
 ## Current state
 
-M0-M4 are complete. The working product passes unit/domain/route/demo tests, lint, strict typecheck, production build, and responsive Playwright/axe checks. Publication, submission media, and Devpost are next.
+M0-M9 are complete. The working product passes unit/domain/route/demo tests, lint, strict typecheck, production build, responsive Playwright/axe checks, and the live GitHub Pages replay verifier. The public demo, creator captions, gallery assets, and Devpost submission are published and verified.
+
+## Published delivery
+
+- Public app: `https://atchayamg.github.io/CascadeOps/`
+- Public repository: `https://github.com/AtchayamG/CascadeOps`
+- Public demo video: `https://youtu.be/eNGNzNmANMs`
+- Submitted Devpost entry: `https://devpost.com/software/cascadeops`
+- Codex session identifier: `019f5282-7c6f-76d1-888e-ffb0c25de3c8`
 
 ## Canonical product
 

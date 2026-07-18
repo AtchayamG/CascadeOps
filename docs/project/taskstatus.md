@@ -2,7 +2,7 @@
 
 ## Active milestone
 
-M6 - public demo video and submission.
+M9 - E2E delivery and verified Devpost submission complete.
 
 ## DONE
 
@@ -19,6 +19,9 @@ M6 - public demo video and submission.
 - Public MIT repository published at `https://github.com/AtchayamG/CascadeOps`; clean GitHub Actions verification passes.
 - Final 2:29.6 demo MP4, expressive Indian-English narration, synchronized SRT captions, and 1280x720 thumbnail are locally verified.
 - Public deterministic Replay deployment verified end-to-end at `https://atchayamg.github.io/CascadeOps/`; the static host truthfully disables Live GPT-5.6.
+- Public YouTube demo published at `https://youtu.be/eNGNzNmANMs` with the prepared thumbnail and creator-uploaded English captions.
+- Devpost entry submitted and publicly verified at `https://devpost.com/software/cascadeops` with Work & Productivity category, public repository/app/video links, project thumbnail, and two captioned gallery screenshots.
+- Required individual/India eligibility details, Codex session identifier, and user-approved Official Rules acceptance were recorded in the submission.
 
 ## BLOCKED
 
@@ -31,5 +34,4 @@ M6 - public demo video and submission.
 
 ## NEXT
 
-1. Publish the verified demo with creator captions and thumbnail.
-2. Complete the truthful Devpost entry and final submission audit.
+1. No required submission work remains. Optional edits remain available until the deadline.

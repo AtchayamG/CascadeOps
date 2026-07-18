@@ -20,8 +20,9 @@ Next.js, React, TypeScript, Zod, OpenAI Responses API with GPT-5.6, Vitest, Play
 
 - Deployed demo: `https://atchayamg.github.io/CascadeOps/`
 - Public MIT repository: `https://github.com/AtchayamG/CascadeOps`
-- Public demo video: `[YOUTUBE_URL]`
-- Required Codex `/feedback` session ID: `[FEEDBACK_SESSION_ID]`
+- Public demo video: `https://youtu.be/eNGNzNmANMs`
+- Devpost project: `https://devpost.com/software/cascadeops`
+- Required Codex session ID: `019f5282-7c6f-76d1-888e-ffb0c25de3c8`
 
 ## Inspiration
 

@@ -13,7 +13,7 @@ This OpenAI Build Week demo shows a refund window changing from 30 to 14 days ac
 Project links:
 - Live demo: https://atchayamg.github.io/CascadeOps/
 - Public MIT repository: https://github.com/AtchayamG/CascadeOps
-- Devpost: [DEVPOST_PROJECT_URL]
+- Devpost: https://devpost.com/software/cascadeops
 
 Chapters:
 - 0:00 The operational policy-change problem
