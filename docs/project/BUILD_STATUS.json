@@ -18,7 +18,7 @@
     "accessibility_verified": true,
     "production_visual_qa": true,
     "public_repository": true,
-    "public_app": false,
+    "public_app": true,
     "demo_video": true,
     "devpost_submission": false
   },
@@ -27,7 +27,7 @@
     "devpost_url": null,
     "youtube_url": null,
     "github_url": "https://github.com/AtchayamG/CascadeOps",
-    "public_app_url": null
+    "public_app_url": "https://atchayamg.github.io/CascadeOps/"
   },
-  "last_updated": "2026-07-19T00:30:00+05:30"
+  "last_updated": "2026-07-19T00:35:00+05:30"
 }

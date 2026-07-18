@@ -14,14 +14,14 @@ IN PROGRESS - verified local product; publication and submission remain.
 - Strict contracts, fixture providers, compiler, API, UI, human decision gate, isolated candidate compilation, deterministic verification, and receipt export are integrated.
 - Replay is visibly simulated and deterministic.
 - Live mode uses GPT-5.6 Responses Structured Outputs, `store: false`, and fails closed without silent fallback; a bounded live smoke proof passed.
-- Local verification: 22 tests, lint, strict typecheck, production build, and desktop/mobile Playwright flows with axe accessibility checks all pass.
+- Verification: 24 tests, lint, strict typecheck, production build, desktop/mobile Playwright flows with axe accessibility checks, and the live GitHub Pages replay-flow verifier all pass.
 - Production visual QA confirms readable responsive cards and contained long IDs/checksums.
 - Public MIT repository and GitHub Actions are verified at `https://github.com/AtchayamG/CascadeOps`.
 - The final local demo package is verified: 2:29.6 H.264/AAC MP4, professional expressive TTS, synchronized SRT, and 1280x720 thumbnail.
+- The public deterministic Replay app is live and E2E-verified at `https://atchayamg.github.io/CascadeOps/`; Live GPT-5.6 is deliberately disabled on the credential-free static host.
 
 ## Not yet verified
 
-- Public deployment
 - Public demo video, creator captions, and thumbnail
 - Submitted Devpost entry
 

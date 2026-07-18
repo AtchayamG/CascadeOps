@@ -11,7 +11,7 @@ CascadeOps turns one approved policy revision into source-cited, human-reviewed 
 This OpenAI Build Week demo shows a refund window changing from 30 to 14 days across five simulated artifacts: a support SOP, request form, customer-response template, QA checklist, and training guide. Every patch requires an explicit human decision before atomic candidate compilation, followed by a separate deterministic verification step and an evidence receipt.
 
 Project links:
-- Live demo: [DEPLOYED_DEMO_URL]
+- Live demo: https://atchayamg.github.io/CascadeOps/
 - Public MIT repository: https://github.com/AtchayamG/CascadeOps
 - Devpost: [DEVPOST_PROJECT_URL]
 

@@ -6,6 +6,10 @@ CascadeOps turns an approved policy revision into a traceable, human-reviewed se
 
 ![CascadeOps policy compiler](docs/submission/cascadeops-home.png)
 
+## Public demo
+
+Try the credential-free deterministic Replay build at [atchayamg.github.io/CascadeOps](https://atchayamg.github.io/CascadeOps/). The public static build deliberately disables Live GPT-5.6; Live Mode remains available in the local/server build with a server-side API key.
+
 ## Why it exists
 
 A policy rarely lives in one place. A single approved clause can be repeated across procedures, forms, templates, checklists, and training material. Manual follow-through is slow and easy to audit poorly. CascadeOps demonstrates a safer workflow:
@@ -53,7 +57,7 @@ npm run build
 npm run smoke
 ```
 
-The current local evidence is 22 passing unit/domain/route/demo tests plus desktop and mobile Playwright flows with axe accessibility checks. A bounded GPT-5.6 smoke test is documented in [docs/testing/LIVE_GPT_5_6_SMOKE.md](docs/testing/LIVE_GPT_5_6_SMOKE.md); it records only non-secret result metadata.
+The current evidence is 24 passing unit/domain/route/demo tests, desktop and mobile Playwright flows with axe accessibility checks, and a separate live GitHub Pages replay-flow verifier. A bounded GPT-5.6 smoke test is documented in [docs/testing/LIVE_GPT_5_6_SMOKE.md](docs/testing/LIVE_GPT_5_6_SMOKE.md); it records only non-secret result metadata.
 
 ## Architecture
 
