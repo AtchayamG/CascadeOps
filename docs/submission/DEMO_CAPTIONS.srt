@@ -1,111 +1,88 @@
 1
-00:00:00,000 --> 00:00:04,500
-Hi, I'm Sarah, an operations lead.
+00:00:00,100 --> 00:00:07,034
+A single approved policy change can leave five operational documents telling five different stories.
 
 2
-00:00:04,500 --> 00:00:08,500
-Implementing a single corporate policy change across an enterprise is painful.
+00:00:07,034 --> 00:00:12,603
+CascadeOps turns that follow-through into a reviewable compilation workflow.
 
 3
-00:00:08,500 --> 00:00:12,000
-Today, I'll show you how CascadeOps turns one revised policy clause into verified operational alignment.
+00:00:12,603 --> 00:00:19,742
+This public demo uses deterministic simulated fixture data, clearly labelled Replay Mode.
 
 4
-00:00:12,000 --> 00:00:17,000
-Here is our source policy.
+00:00:19,742 --> 00:00:27,319
+Our source refund clause changes from thirty days to fourteen, with stable clause and change identifiers.
 
 5
-00:00:17,000 --> 00:00:22,000
-The refund window changed from 30 days to 14 days, recorded as a single clause modification.
+00:00:27,319 --> 00:00:41,765
+CascadeOps traces that clause through a curated set of dependencies and proposes five bounded edits: a support SOP, request form, response template, QA checklist, and training guide.
 
 6
-00:00:22,000 --> 00:00:27,000
-Other clauses remain untouched, ensuring we isolate only relevant changes.
+00:00:41,765 --> 00:00:47,048
+Every proposal cites its exact target anchor and source change.
 
 7
-00:00:27,000 --> 00:00:32,000
-Let's compile this change. CascadeOps traces the revised clause through a curated set of dependencies.
+00:00:47,048 --> 00:00:51,082
+Human authority is enforced, not implied.
 
 8
-00:00:32,000 --> 00:00:37,000
-In Live mode, this uses GPT-5.6 with Structured Outputs...
+00:00:51,082 --> 00:00:56,224
+I can reject a patch, and candidate compilation fails closed.
 
 9
-00:00:37,000 --> 00:00:42,000
-...and store: false to protect data privacy, proven in our local smoke test.
+00:00:56,224 --> 00:01:00,051
+I can revise that decision before compilation.
 
 10
-00:00:42,000 --> 00:00:48,000
-The compiler identifies exactly five affected artifacts.
+00:01:00,051 --> 00:01:05,837
+Only when all five proposals are explicitly approved does the workflow continue.
 
 11
-00:00:48,000 --> 00:00:54,000
-For accessibility, I can toggle from this visual graph to a semantic, keyboard-friendly data table.
+00:01:05,837 --> 00:01:13,814
+Now CascadeOps applies all five replacements atomically to isolated, in-memory candidate copies.
 
 12
-00:00:54,000 --> 00:01:00,000
-The graph is hidden from screen readers...
+00:01:13,814 --> 00:01:18,028
+The state says candidate compiled, not verified.
 
 13
-00:01:00,000 --> 00:01:07,000
-...focusing purely on screen-readable data.
+00:01:18,028 --> 00:01:22,255
+No enterprise file or repository is modified.
 
 14
-00:01:07,000 --> 00:01:12,000
-Here are the five proposed patches.
+00:01:22,255 --> 00:01:26,417
+Verification is a separate, model-free action.
 
 15
-00:01:12,000 --> 00:01:18,000
-Each cites the exact target anchor and policy clause change.
+00:01:26,417 --> 00:01:37,667
+Twenty deterministic assertions check that stale values are absent, the new value is present, anchors remain intact, and untouched blocks are unchanged.
 
 16
-00:01:18,000 --> 00:01:23,000
-We must approve each patch individually.
+00:01:37,667 --> 00:01:41,211
+Only then do the candidates become verified.
 
 17
-00:01:23,000 --> 00:01:30,000
-Rejections block candidate compilation...
+00:01:41,211 --> 00:01:46,817
+The receipt records the run, decision totals, and assertion evidence.
 
 18
-00:01:30,000 --> 00:01:37,000
-...preventing any unchecked changes from being applied.
+00:01:46,817 --> 00:01:56,288
+Its SHA-256 value is a content checksum for integrity comparison, not a digital signature or compliance seal.
 
 19
-00:01:37,000 --> 00:01:44,000
-Now we compile the approved changes into isolated candidate copies...
+00:01:56,288 --> 00:02:08,195
+Codex served as principal engineer: architecture, strict contracts, compiler, interface, worker coordination, tests, and final evidence audit.
 
 20
-00:01:44,000 --> 00:01:50,000
-...then execute our deterministic verification check.
+00:02:08,195 --> 00:02:20,721
+Optional Live Mode uses GPT-5.6 Responses Structured Outputs with request storage disabled through store false, strict validation, and no silent fallback.
 
 21
-00:01:50,000 --> 00:01:56,000
-This model-free step asserts that no stale 30-day references remain...
+00:02:20,721 --> 00:02:24,162
+A bounded local live smoke proof passed.
 
 22
-00:01:56,000 --> 00:02:02,000
-...and all other content is unchanged.
+00:02:24,162 --> 00:02:29,497
+CascadeOps: one policy change, every operation aligned.
 
-23
-00:02:02,000 --> 00:02:07,000
-With verification passed, we export our compilation receipt.
-
-24
-00:02:07,000 --> 00:02:12,000
-This JSON file records every decision and verification assertion.
-
-25
-00:02:12,000 --> 00:02:17,000
-Its SHA-256 checksum verifies content integrity only, without acting as a digital signature.
-
-26
-00:02:17,000 --> 00:02:22,000
-Our clean repository and rigorous test gates were built by Codex...
-
-27
-00:02:22,000 --> 00:02:27,000
-...with GPT-5.6 handling live structured inference.
-
-28
-00:02:27,000 --> 00:02:30,000
-CascadeOps keeps operations aligned. One policy change, every operation aligned. Thank you.

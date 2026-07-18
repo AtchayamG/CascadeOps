@@ -1,84 +1,115 @@
-# CascadeOps — Policy Change Compiler
+# CascadeOps - Policy Change Compiler
 
 ## Tagline
+
 One policy change. Every operation aligned.
 
-## Short Description
-CascadeOps aligns downstream operational documents (SOPs, forms, response templates, QA checklists, and training guides) with revised corporate policies by compiling source-linked patches, enforcing human approval gates, and executing deterministic verification.
+## Short description
+
+CascadeOps turns an approved policy revision into source-cited, human-reviewed candidate updates across dependent SOPs, forms, templates, checklists, and training material.
 
 ## Category
+
 Work & Productivity
 
-## Technologies Used
-Next.js, React, TypeScript, Zod, OpenAI API (GPT-5.6), Vitest, Playwright, Axe-core, CSS
+## Technologies used
 
-## Submission Links & Session Details
-- **Deployed Demo URL**: `[DEPLOYED_DEMO_URL_PLACEHOLDER]`
-- **GitHub Repository**: `[GITHUB_REPOSITORY_URL_PLACEHOLDER]`
-- **Demo Video URL**: `[DEMO_VIDEO_URL_PLACEHOLDER]`
-- **Primary Codex Task / Feedback ID**: `[FEEDBACK_ID_PLACEHOLDER]`
+Next.js, React, TypeScript, Zod, OpenAI Responses API with GPT-5.6, Vitest, Playwright, axe-core, GitHub Actions
 
----
+## Submission links
 
-## Full Story
+- Deployed demo: `[DEPLOYED_DEMO_URL]`
+- Public MIT repository: `https://github.com/AtchayamG/CascadeOps`
+- Public demo video: `[YOUTUBE_URL]`
+- Required Codex `/feedback` session ID: `[FEEDBACK_SESSION_ID]`
 
-### Inspiration
-When an organization changes a policy, the source policy document is updated, but downstream operational materials (such as training guides, SOPs, customer service templates, and forms) silently rot. Important QA checklists and training materials continue teaching old rules, leading to operational drift and inconsistency. 
+## Inspiration
 
-Traditional approaches rely on manual, error-prone text searches, or complex, opaque workflows. CascadeOps was inspired by software compilers: treating a policy update like a source code modification. It compares policy versions, identifies the exact affected location anchors in downstream operational files, proposes precise changes, mandates human approval, and verifies correctness before exporting the final candidates.
+A policy rarely lives in one place. Once a clause is approved, the same rule may appear in a support SOP, a request form, a customer-response template, a QA checklist, and a training guide. Manually finding, reviewing, and proving every follow-on update is slow and difficult to audit.
 
-### What It Does
-CascadeOps is an operations alignment aid designed to compile a single policy change across dependent artifacts. In its canonical P0 scenario, the refund window clause is updated from **30 days** to **14 days**. CascadeOps:
-1. **Compares Policy Versions**: Detects the modified refund window clause (`clause.refund-window`) between Policy Version 1 and Version 2.
-2. **Scans Dependencies**: Maps the change to exactly five affected operational artifacts at specific location anchors.
-3. **Generates Patches**: Proposes precise text replacements (e.g., replacing "30 days" with "14 days") citing the exact policy change and target anchor.
-4. **Enforces Human Approvals**: Requires explicit approve/reject decisions on each of the five patches. Rejections freeze the process, preventing compilation and verification.
-5. **Compiles & Verifies Candidates**: Applies approved patches to in-memory candidate copies and executes a separate suite of deterministic, model-free assertions to verify that no stale references remain.
-6. **Exports Receipt**: Generates a downloadable Compilation Receipt with a SHA-256 checksum for content-integrity check, along with the patched files.
+CascadeOps borrows the mental model of a compiler: treat the approved policy as source, trace its bounded dependencies, propose exact target edits, require human decisions, compile isolated candidates, and verify them before producing evidence.
 
-### How It Works
-CascadeOps operates strictly on in-memory candidate copies of the documents and does not write to external enterprise systems or databases:
-- **Policy Comparison**: Compares structural clauses in the policy document to identify the exact changed text.
-- **Provider Layer**: CascadeOps has two provider modes:
-  - **Replay Mode (Default)**: A deterministic, local fixture-backed provider that processes mock data locally without network requests, clearly badged as "Simulated" in the UI.
-  - **Live Mode**: An OpenAI API integration utilizing `gpt-5.6` with Structured Outputs. It parses the inputs and returns structured payloads conforming to strict Zod schemas. It uses `store: false` to ensure zero data retention, keeping corporate text private.
-- **Fail-Closed Validation**: Every payload from the provider is verified server-side against schema structures, known IDs, valid citations, and exact grounding checks (verifying the "before" text matches the source target). Any failure halts execution with a typed error code.
-- **Human Approval State Machine**: Patches must be individually approved. Re-decisions are permitted before compilation. If even one patch is rejected, candidate compilation is blocked.
-- **Deterministic Verification**: Once applied, a separate step runs model-free validations: checking that all stale value references are absent, the new value is present, anchors are intact, and untouched blocks are byte-identical.
-- **Receipt Generation**: Outputs a JSON receipt summarizing the run details, timestamps, and a SHA-256 content checksum.
+## What it does
 
-### How We Built It
-We built CascadeOps using Next.js, React, and TypeScript with a strict focus on validation, security, and accessibility. The development roles were partitioned as follows:
-- **Codex Role**: Initialized the Next.js pre-production layout, created the core compiler logic, set up Zod validation schemas, implemented the deterministic verification engine, and built the local testing suites (Vitest unit tests, Playwright end-to-end flows, and Axe accessibility checks).
-- **GPT-5.6 Role**: Powered the Live Mode provider, analyzing policy changes and generating proposed patches through structured API outputs with strict schema matching and `store: false`.
+The focused P0 scenario changes a refund window from 30 days to 14 days. CascadeOps:
 
-### Challenges We Ran Into
-- **Strict Grounding Enforcement**: Ensuring that LLM proposals could not hallucinate locations or generate arbitrary edits. We solved this by implementing strict server-side validation that rejects any proposed patch where the `beforeText` does not match the target anchor's original text byte-for-byte.
-- **Fail-Closed Security**: Preventing silent degradation of state or model fallbacks. We structured the API so that any invalid model output or network failure instantly triggers a visible typed error (e.g., `CO-VAL-*` or `CO-PROV-*`) and halts the run.
-- **Accessibility Integration**: Creating a responsive, accessible interface. We built a toggle that lets users switch from the visual document dependency graph (hidden from screen readers via `aria-hidden="true"`) to a semantic HTML table that supports complete keyboard navigation.
+1. Compares the original and revised `clause.refund-window` text.
+2. Maps that change through a curated five-artifact dependency fixture.
+3. Produces five source-cited patch proposals, each tied to an exact artifact anchor.
+4. Requires an explicit approve or reject decision for every proposal.
+5. Blocks candidate compilation if any proposal is pending or rejected; the reviewer may change a decision before compilation.
+6. Compiles all five approved patches atomically into isolated in-memory candidate copies.
+7. Runs a separate deterministic verification step for stale-value absence, new-value presence, anchor integrity, and untouched-block equality.
+8. Exports a JSON compilation receipt containing the decision and assertion evidence plus an SHA-256 content checksum.
 
-### Accomplishments That We're Proud Of
-- **Zero-Dependency Core Validation**: Writing robust, deterministic validation logic that guarantees compliance with the strict data contracts without requiring external state management or heavy libraries.
-- **100% Local Smoke Test Verification**: Proving that the Live Mode system runs correctly using the local GPT-5.6 Responses API, and ensuring that Replay mode remains entirely separate and deterministic.
-- **Lighthouse/Axe Accessibility Compliance**: Ensuring a 95+ accessibility score, enabling the application to be fully navigated by keyboard and screen readers.
+Candidate compilation and verification are intentionally separate. CascadeOps never labels a candidate verified until deterministic assertions pass.
 
-### What We Learned
-- **Deterministic Bounds for LLMs**: Large Language Models are highly effective at structured extraction when combined with schema enforcement, but critical operations like verification must be entirely model-free and deterministic.
-- **State Invariants**: Structuring the compilation as a series of frozen state transitions (from `IDLE` through `VERIFIED`) ensures that incomplete or rejected operations can never leak into exported assets.
+## How it works
 
-### What's Next for CascadeOps
-- **Extending Document Formats**: Parsing and compiling changes across a wider array of document types, including PDF, Markdown, and Word documents.
-- **Dry-Run Policy Generators**: Enabling interactive simulations of proposed policy updates to assess downstream operational impact before finalizing changes.
-- **Enhanced Local Verification Rules**: Supporting custom, regular expression-based assertion rules that operations teams can configure per location anchor.
+CascadeOps has two explicit provider modes:
 
----
+- **Simulated Replay**, the default public judging path, is deterministic and fixture-backed. It needs no credentials and is visibly labelled as simulated.
+- **Live GPT-5.6** uses the OpenAI Responses API with Structured Outputs and `store: false`, which disables request storage for those calls. Live responses must satisfy strict Zod schemas and citation/grounding validation. Provider or validation errors fail closed, with no silent Replay fallback.
 
-## Setup & Judging Notes
-CascadeOps has been designed for credential-free, zero-config judging out of the box:
-1. **Replay Mode (Default)**: The app runs entirely in Replay Mode by default. It features a persistent banner indicating simulated data. You can click through the entire Golden Path (compare clauses, view 5 findings, approve 5 proposals, compile, run verification, and download the receipt) without supplying any API keys.
-2. **Live Mode Proof**: Live Mode is supported via the OpenAI Responses API. To protect keys, the public deployment is locked to Replay. However, the system's Live capability is fully proven by the documented local smoke test in `docs/testing/LIVE_GPT_5_6_SMOKE.md` using `gpt-5.6` with `store: false` and strict Structured Outputs.
-3. **Local Testing & Verification**:
-   - Run unit and contract tests: `npm run test`
-   - Run verification assertions test: `npm run demo-assert`
-   - Run end-to-end smoke tests (with accessibility checks): `npx playwright test`
-   - Run production build: `npm run build`
+The model is bounded to impact analysis and patch proposal generation. Deterministic TypeScript owns known-ID validation, citation checks, approval enforcement, atomic candidate compilation, verification, and receipt construction.
+
+P0 operates only on in-memory fixture artifacts. It does not ingest arbitrary company documents, write external enterprise systems, or provide legal or compliance certification.
+
+## How we built it
+
+Codex acted as principal engineer and product integrator. It reconciled the master blueprint, froze the typed contracts and truth boundaries, coordinated Claude and agy workers in isolated worktrees, implemented and integrated the compiler/API/UI, reproduced every test gate, ran the bounded live proof, and audited the public evidence.
+
+GPT-5.6 powers the optional live impact and patch proposal stages via Responses Structured Outputs. It never approves a patch, writes an external system, or decides whether verification passed.
+
+The product is a strict Next.js and TypeScript application with Zod contracts. Vitest covers contracts, compiler behavior, API state transitions, and the deterministic demo. Playwright exercises the complete Replay path on desktop and mobile, with axe accessibility checks. GitHub Actions reproduces lint, typecheck, tests, production build, and browser smoke flows from a clean checkout.
+
+## Challenges
+
+### Grounding model output
+
+The main risk was allowing a model to invent a location or edit outside the approved clause. Every impact and proposal is therefore checked against known artifact IDs, exact anchors, the changed clause, and the source `beforeText`. Invalid payloads stop with typed errors.
+
+### Preserving human authority
+
+Approval could not be a decorative button. The state machine permits re-decisions before compilation, but any pending or rejected proposal blocks compilation, verification, receipt generation, and export.
+
+### Separating compilation from proof
+
+An early UI state used verification language too soon. Manual browser QA caught it. We separated candidate compilation and deterministic verification in both the server contract and visible states, then added a browser regression assertion.
+
+### Honest public delivery
+
+The public experience must work without exposing a key. Replay is therefore the credential-free golden path. The optional live implementation was proven separately with one bounded local GPT-5.6 smoke run whose evidence contains no secret or raw payload.
+
+## Accomplishments
+
+- A complete five-artifact golden path with exact source and target citations.
+- A genuine fail-closed human approval gate and atomic candidate compiler.
+- A separate deterministic verifier producing 20 fixture assertions.
+- A bounded live GPT-5.6 proof using Structured Outputs, `store: false`, and no silent fallback.
+- 22 passing unit/domain/route/demo tests plus passing desktop and mobile Playwright/axe flows.
+- A public MIT repository with a successful clean GitHub Actions run and zero dependency vulnerabilities at publication time.
+
+## What we learned
+
+LLMs are useful for bounded structured analysis, but authorization and proof should be deterministic. Strict schemas help, yet schemas alone are insufficient: IDs, citations, source text, state transitions, and unchanged content also need application-level validation.
+
+We also learned that copy is part of the safety system. "Proposed," "candidate compiled," and "verified" are different states, and the interface must preserve those distinctions.
+
+## What's next
+
+- User-supplied Markdown and DOCX ingestion with explicit trust and size boundaries.
+- Configurable artifact schemas and verification rules.
+- Review queues, decision history, and signed-in team workspaces.
+- Optional connectors that remain preview-first and require an additional explicit authorization gate before any external write.
+
+## Setup and judging notes
+
+1. Open the deployed app; Simulated Replay is selected by default.
+2. Click **Compile Policy Change**.
+3. Review and approve all five proposals. A pending or rejected proposal demonstrates the fail-closed gate.
+4. Click **Compile Approved Candidates**.
+5. Click **Run Verification Check**.
+6. Open and download the compilation receipt.
+
+For local development, use Node.js 22.13+, run `npm ci`, copy `.env.example` to `.env.local`, and run `npm run dev`. Replay requires no key. Optional Live mode requires a server-side `OPENAI_API_KEY`.

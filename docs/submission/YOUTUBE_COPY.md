@@ -1,35 +1,31 @@
-# YouTube Video Copy — CascadeOps Demo
+# YouTube Copy - CascadeOps Demo
 
-## Title Option
-CascadeOps — One Policy Change. Every Operation Aligned.
+## Title
 
----
+CascadeOps - OpenAI Build Week Demo | Codex + GPT-5.6
 
 ## Description
-CascadeOps aligns downstream operational documents (SOPs, forms, templates, checklists, and guides) with revised corporate policies by compiling source-linked patches, enforcing human approval gates, and executing deterministic verification.
 
-This demo walks through our canonical P0 scenario: updating a refund window from 30 days to 14 days across five distinct operational documents in a deterministic, simulated environment.
+CascadeOps turns one approved policy revision into source-cited, human-reviewed candidate updates across dependent operational artifacts.
 
-### Video Chapters
-- 0:00 Introduction & Operational Problem
-- 0:12 Policy Clause Comparison (30 to 14 Days)
-- 0:27 Compiling & Dependency Tracing
-- 0:42 Impact Cascade & Accessibility Table
-- 1:07 Patch Proposals & Human Approval Gate
-- 1:37 Candidate Compilation & Deterministic Verification
-- 2:02 Compilation Receipt Export (SHA-256)
-- 2:17 Repository Architecture & Outro
+This OpenAI Build Week demo shows a refund window changing from 30 to 14 days across five simulated artifacts: a support SOP, request form, customer-response template, QA checklist, and training guide. Every patch requires an explicit human decision before atomic candidate compilation, followed by a separate deterministic verification step and an evidence receipt.
 
-### Project Links (Placeholders)
-- Deployed Application: `[DEPLOYED_DEMO_URL_PLACEHOLDER]`
-- GitHub Repository: `[GITHUB_REPOSITORY_URL_PLACEHOLDER]`
-- Devpost Project: `[DEVPOST_PROJECT_URL_PLACEHOLDER]`
-- Codex Feedback Session ID: `[FEEDBACK_ID_PLACEHOLDER]`
+Project links:
+- Live demo: [DEPLOYED_DEMO_URL]
+- Public MIT repository: https://github.com/AtchayamG/CascadeOps
+- Devpost: [DEVPOST_PROJECT_URL]
 
----
+Chapters:
+- 0:00 The operational policy-change problem
+- 0:10 Source clause and simulated Replay
+- 0:27 Five cited impact proposals
+- 0:47 Human approval gate
+- 1:06 Isolated candidate compilation
+- 1:22 Deterministic verification
+- 1:41 Evidence receipt and checksum
+- 1:56 How Codex and GPT-5.6 were used
+- 2:23 One policy change, every operation aligned
 
-## Safety, Privacy, and Limitations Statement
-- **Operations Alignment Aid**: CascadeOps is an operational alignment aid. It is not legal advice and does not provide compliance or legal certification.
-- **In-Memory Bounded Scope**: In P0, CascadeOps compiles changes to in-memory candidate copies only. It does not write to external enterprise systems, repositories, or databases.
-- **Replay vs. Live Modes**: The demo application runs in Replay Mode using deterministic simulated fixture data. Live Mode utilizes the OpenAI Responses API with GPT-5.6 Structured Outputs and `store: false` to prevent data retention, verified through our local smoke test.
-- **Receipt Integrity**: The exported Compilation Receipt contains a SHA-256 checksum for content integrity verification. It is not a digital signature, seal, or notary.
+Codex served as principal engineer across architecture, contracts, implementation, integration, tests, and evidence review. Optional Live Mode uses GPT-5.6 Responses Structured Outputs with `store: false`, strict application validation, and no silent Replay fallback. The public judging path defaults to credential-free, deterministic simulated Replay.
+
+Limitations: CascadeOps P0 uses bounded in-memory fixture artifacts. It does not write external enterprise systems, provide legal advice, or certify compliance. The receipt SHA-256 value is a content checksum, not a digital signature or seal.

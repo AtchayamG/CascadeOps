@@ -16,6 +16,8 @@ M5 - public repository and deployment.
 - A bounded live GPT-5.6 Structured Outputs smoke proof passed with `store: false` and no fallback.
 - Final local gates pass: 22 unit/domain/route/demo tests, lint, strict typecheck, production build, and two Playwright desktop/mobile flows with axe accessibility checks.
 - Production-mode visual QA completed; long IDs and SHA-256 checksums wrap inside their containers.
+- Public MIT repository published at `https://github.com/AtchayamG/CascadeOps`; clean GitHub Actions verification passes.
+- Final 2:29.6 demo MP4, expressive Indian-English narration, synchronized SRT captions, and 1280x720 thumbnail are locally verified.
 
 ## BLOCKED
 
@@ -28,7 +30,6 @@ M5 - public repository and deployment.
 
 ## NEXT
 
-1. Publish and clean-clone verify the public MIT repository.
-2. Deploy the credential-free Replay demo and verify the public URL.
-3. Produce and publish the under-three-minute demo with creator captions and thumbnail.
-4. Complete the truthful Devpost entry and final submission audit.
+1. Deploy the credential-free Replay demo and verify the public URL.
+2. Publish the verified demo with creator captions and thumbnail.
+3. Complete the truthful Devpost entry and final submission audit.
