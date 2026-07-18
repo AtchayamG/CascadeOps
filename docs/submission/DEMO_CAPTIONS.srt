@@ -1,0 +1,111 @@
+1
+00:00:00,000 --> 00:00:04,500
+Hi, I'm Sarah, an operations lead.
+
+2
+00:00:04,500 --> 00:00:08,500
+Implementing a single corporate policy change across an enterprise is painful.
+
+3
+00:00:08,500 --> 00:00:12,000
+Today, I'll show you how CascadeOps turns one revised policy clause into verified operational alignment.
+
+4
+00:00:12,000 --> 00:00:17,000
+Here is our source policy.
+
+5
+00:00:17,000 --> 00:00:22,000
+The refund window changed from 30 days to 14 days, recorded as a single clause modification.
+
+6
+00:00:22,000 --> 00:00:27,000
+Other clauses remain untouched, ensuring we isolate only relevant changes.
+
+7
+00:00:27,000 --> 00:00:32,000
+Let's compile this change. CascadeOps traces the revised clause through a curated set of dependencies.
+
+8
+00:00:32,000 --> 00:00:37,000
+In Live mode, this uses GPT-5.6 with Structured Outputs...
+
+9
+00:00:37,000 --> 00:00:42,000
+...and store: false to protect data privacy, proven in our local smoke test.
+
+10
+00:00:42,000 --> 00:00:48,000
+The compiler identifies exactly five affected artifacts.
+
+11
+00:00:48,000 --> 00:00:54,000
+For accessibility, I can toggle from this visual graph to a semantic, keyboard-friendly data table.
+
+12
+00:00:54,000 --> 00:01:00,000
+The graph is hidden from screen readers...
+
+13
+00:01:00,000 --> 00:01:07,000
+...focusing purely on screen-readable data.
+
+14
+00:01:07,000 --> 00:01:12,000
+Here are the five proposed patches.
+
+15
+00:01:12,000 --> 00:01:18,000
+Each cites the exact target anchor and policy clause change.
+
+16
+00:01:18,000 --> 00:01:23,000
+We must approve each patch individually.
+
+17
+00:01:23,000 --> 00:01:30,000
+Rejections block candidate compilation...
+
+18
+00:01:30,000 --> 00:01:37,000
+...preventing any unchecked changes from being applied.
+
+19
+00:01:37,000 --> 00:01:44,000
+Now we compile the approved changes into isolated candidate copies...
+
+20
+00:01:44,000 --> 00:01:50,000
+...then execute our deterministic verification check.
+
+21
+00:01:50,000 --> 00:01:56,000
+This model-free step asserts that no stale 30-day references remain...
+
+22
+00:01:56,000 --> 00:02:02,000
+...and all other content is unchanged.
+
+23
+00:02:02,000 --> 00:02:07,000
+With verification passed, we export our compilation receipt.
+
+24
+00:02:07,000 --> 00:02:12,000
+This JSON file records every decision and verification assertion.
+
+25
+00:02:12,000 --> 00:02:17,000
+Its SHA-256 checksum verifies content integrity only, without acting as a digital signature.
+
+26
+00:02:17,000 --> 00:02:22,000
+Our clean repository and rigorous test gates were built by Codex...
+
+27
+00:02:22,000 --> 00:02:27,000
+...with GPT-5.6 handling live structured inference.
+
+28
+00:02:27,000 --> 00:02:30,000
+CascadeOps keeps operations aligned. One policy change, every operation aligned. Thank you.
