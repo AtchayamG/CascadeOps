@@ -77,12 +77,19 @@ function requireCitation(ctx: ValidationContext, changeId: string, subjectId: st
 }
 
 export function validateImpacts(findings: ImpactFinding[], ctx: ValidationContext): ImpactFinding[] {
+  const targets = new Set<string>();
   for (const f of findings) {
     const cited = requireCitation(ctx, f.changeId, f.id);
     if (f.clauseId !== cited.clauseId) {
       fail("CO-VAL-005", `Impact '${f.id}' cites clause '${f.clauseId}', which is not the changed clause of '${f.changeId}'.`, f.id);
     }
-    findBlock(ctx, f.location.artifactId, f.location.anchorId);
+    const block = findBlock(ctx, f.location.artifactId, f.location.anchorId);
+    if (f.location.excerpt !== block.text) {
+      fail("CO-VAL-006", `Impact '${f.id}' excerpt does not match '${f.location.anchorId}'.`, f.id);
+    }
+    const target = `${f.location.artifactId}#${f.location.anchorId}`;
+    if (targets.has(target)) fail("CO-VAL-007", `Duplicate impact target '${target}'.`, f.id);
+    targets.add(target);
   }
   return findings;
 }
@@ -105,6 +112,10 @@ export function validatePatches(
     const block = findBlock(ctx, p.location.artifactId, p.location.anchorId);
     if (p.beforeText !== block.text) {
       fail("CO-VAL-006", `Patch '${p.id}' beforeText does not match the current text of '${p.location.anchorId}'.`, p.id);
+    }
+    const expectedAfter = p.beforeText.replaceAll("30 days", "14 days").replaceAll("30-day", "14-day");
+    if (p.afterText !== expectedAfter || p.afterText === p.beforeText) {
+      fail("CO-VAL-008", `Patch '${p.id}' is not the bounded refund-window replacement.`, p.id);
     }
     const anchorKey = `${p.location.artifactId}#${p.location.anchorId}`;
     const existing = byAnchor.get(anchorKey);
