@@ -1,5 +1,5 @@
 import React from "react";
-import { PolicyDocument, ClauseChange } from "./compiler";
+import type { PolicyDocument, ClauseChange } from "@/lib/contracts";
 
 interface PolicyPanelProps {
   originalPolicy: PolicyDocument;
@@ -99,16 +99,43 @@ export const PolicyPanel: React.FC<PolicyPanelProps> = ({
 
         {/* Policy Metadata & Details */}
         <div className="mt-2 text-xs flex flex-col gap-2 p-3 bg-gray-50 rounded border border-dashed" style={{ borderColor: "var(--border-neutral)" }}>
-          <p className="font-semibold text-gray-700">Affected Clause Information:</p>
+          <p className="font-semibold text-gray-700">Affected Clause Information (Click to Copy):</p>
           <div className="grid grid-cols-3 gap-1">
             <span className="text-gray-500 font-mono">Clause ID:</span>
-            <span className="col-span-2 font-mono break-all">clause.refund-window</span>
+            <span
+              onClick={() => navigator.clipboard.writeText("clause.refund-window")}
+              className="col-span-2 font-mono break-all cursor-pointer hover:underline text-gray-800"
+              title="Click to copy Clause ID"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { navigator.clipboard.writeText("clause.refund-window"); } }}
+            >
+              clause.refund-window
+            </span>
 
             <span className="text-gray-500 font-mono">Change ID:</span>
-            <span className="col-span-2 font-mono break-all">change.refund-window</span>
+            <span
+              onClick={() => navigator.clipboard.writeText("change.refund-window")}
+              className="col-span-2 font-mono break-all cursor-pointer hover:underline text-gray-800"
+              title="Click to copy Change ID"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { navigator.clipboard.writeText("change.refund-window"); } }}
+            >
+              change.refund-window
+            </span>
 
             <span className="text-gray-500 font-mono">Source Hash:</span>
-            <span className="col-span-2 font-mono break-all text-gray-400">7a8b6f3c9d01a... (v2 source)</span>
+            <span
+              onClick={() => navigator.clipboard.writeText("7a8b6f3c9d01a30ef52bc923e421cd754ab8cf76")}
+              className="col-span-2 font-mono break-all cursor-pointer hover:underline text-gray-500"
+              title="Click to copy Source Hash"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { navigator.clipboard.writeText("7a8b6f3c9d01a30ef52bc923e421cd754ab8cf76"); } }}
+            >
+              7a8b6f3c9d01a... (v2 source)
+            </span>
           </div>
         </div>
       </div>

@@ -320,3 +320,31 @@ footer {
   color: var(--state-green);
   border: 1px solid var(--border-green);
 }
+
+/* Skip link styling for high contrast a11y focus */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  background-color: var(--trace-blue);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  z-index: 1000;
+  transition: top 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 1rem;
+  outline: 2px solid white;
+}
+
+/* Restrained keyboard operability outline focus states */
+button:focus-visible,
+a:focus-visible,
+span[role="button"]:focus-visible {
+  outline: 2px solid var(--trace-blue) !important;
+  outline-offset: 2px !important;
+}

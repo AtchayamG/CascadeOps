@@ -1,31 +1,24 @@
 import React, { useRef, useEffect, useState } from "react";
-import { VerificationAssertion, CompilationReceipt } from "./compiler";
+import type { CompilationReceipt } from "@/lib/contracts";
 
 interface ReceiptModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: "replay" | "live";
-  contentHash: string;
-  assertions: VerificationAssertion[];
+  receipt: CompilationReceipt;
 }
 
 export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   isOpen,
   onClose,
-  mode,
-  contentHash,
-  assertions,
+  receipt,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
-
-  const [runId] = useState(() => `run.p0-replay-${Math.floor(100000 + Math.random() * 900000)}`);
-  const [createdAt] = useState(() => new Date().toISOString());
+  const [copiedText, setCopiedText] = useState<string | null>(null);
 
   // Accessible keyboard focus trapping
   useEffect(() => {
     if (isOpen) {
-      // Focus the close button when modal opens
       closeBtnRef.current?.focus();
 
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,7 +44,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       };
 
       document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden"; // Prevent background scroll
+      document.body.style.overflow = "hidden";
 
       return () => {
         document.removeEventListener("keydown", handleKeyDown);
@@ -62,38 +55,19 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
   if (!isOpen) return null;
 
-  const receiptId = "COMP-REC-2026-07-18-001";
-
-  // Build receipt payload
-  const receiptPayload: CompilationReceipt = {
-    runId: runId || "run.p0-replay-pending",
-    mode: mode,
-    simulated: mode === "replay",
-    model: mode === "live" ? "gpt-5.6" : null,
-    policyId: "policy.refund-policy",
-    fromVersion: "v1",
-    toVersion: "v2",
-    changeIds: ["change.refund-window"],
-    patchSummary: {
-      proposed: 5,
-      approved: 5,
-      rejected: 0,
-      applied: 5,
-      verified: 5,
-    },
-    assertions: assertions,
-    residualRisks: [],
-    createdAt: createdAt || new Date().toISOString(),
-    contentHash: contentHash,
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(null), 2000);
   };
 
   const handleDownload = () => {
-    const dataStr = JSON.stringify(receiptPayload, null, 2);
+    const dataStr = JSON.stringify(receipt, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `cascadeops-receipt-${receiptId.toLowerCase()}.json`;
+    link.download = `cascadeops-receipt-${receipt.runId.toLowerCase()}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -109,7 +83,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     >
       <div
         ref={modalRef}
-        className="w-full max-w-xl bg-white rounded-lg border shadow-xl flex flex-col p-6 animate-fade-in"
+        className="w-full max-w-xl bg-white rounded-lg border shadow-xl flex flex-col p-6 animate-fade-in relative"
         style={{
           backgroundColor: "var(--bg-canvas)",
           borderColor: "var(--border-neutral)",
@@ -133,12 +107,31 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
         </div>
 
         {/* Modal Content */}
-        <div className="py-6 flex flex-col gap-4 overflow-y-auto max-h-[60vh]">
+        <div
+          className="py-6 flex flex-col gap-4 overflow-y-auto max-h-[60vh]"
+          tabIndex={0}
+          role="region"
+          aria-label="Receipt details content"
+        >
+          {/* Toast Notification */}
+          {copiedText && (
+            <div className="p-2 text-center text-xs font-semibold rounded bg-green-50 border border-green-200 text-green-800 animate-pulse">
+              Copied {copiedText} to clipboard!
+            </div>
+          )}
+
           {/* Key Metrics */}
           <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded border text-sm" style={{ borderColor: "var(--border-neutral)" }}>
             <div>
               <p className="text-xs text-gray-500 font-mono">Receipt ID:</p>
-              <p className="font-semibold text-gray-800 font-mono">{receiptId}</p>
+              <button
+                type="button"
+                onClick={() => handleCopy(receipt.runId, "Receipt ID")}
+                className="font-semibold text-gray-800 font-mono text-left break-all bg-transparent border-none p-0 cursor-pointer hover:underline"
+                title="Click to copy Receipt ID"
+              >
+                {receipt.runId}
+              </button>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-mono">Alignment Status:</p>
@@ -146,11 +139,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             </div>
             <div>
               <p className="text-xs text-gray-500 font-mono">Source Version:</p>
-              <p className="font-semibold text-gray-800 font-mono">REFUND-01-REV</p>
+              <p className="font-semibold text-gray-800 font-mono">
+                {receipt.fromVersion.toUpperCase()} → {receipt.toVersion.toUpperCase()}
+              </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-mono">Files Compiled:</p>
-              <p className="font-semibold text-gray-800 font-mono">5 / 5</p>
+              <p className="font-semibold text-gray-800 font-mono">
+                {receipt.patchSummary.applied} / {receipt.patchSummary.proposed}
+              </p>
             </div>
           </div>
 
@@ -162,16 +159,21 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             <div className="grid grid-cols-3 gap-1">
               <span className="text-gray-500">Compiler:</span>
               <span className="col-span-2">
-                CascadeOps v0.1 — {mode === "replay" ? "Simulated Replay" : "Live GPT-5.6"}
+                CascadeOps v0.1 — {receipt.mode === "replay" ? "Simulated Replay" : "Live GPT-5.6"}
               </span>
 
               <span className="text-gray-500">Digest Type:</span>
               <span className="col-span-2">SHA-256 content checksum (not a digital signature)</span>
 
               <span className="text-gray-500 text-[10px] md:text-xs">Digest Hash:</span>
-              <span className="col-span-2 text-[10px] md:text-xs break-all text-gray-700 font-semibold selection:bg-teal-100">
-                {contentHash}
-              </span>
+              <button
+                type="button"
+                onClick={() => handleCopy(receipt.contentHash, "Digest Hash")}
+                className="col-span-2 text-[10px] md:text-xs text-left break-all text-gray-700 font-semibold selection:bg-teal-100 bg-transparent border-none p-0 cursor-pointer hover:underline"
+                title="Click to copy Digest Hash"
+              >
+                {receipt.contentHash}
+              </button>
             </div>
           </div>
 
@@ -180,16 +182,21 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             <h3 className="font-bold text-xs text-gray-700 uppercase tracking-wider">
               Verification Assertions Evidence
             </h3>
-            <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
-              {assertions.map((assert) => (
+            <div
+              className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1"
+              tabIndex={0}
+              role="region"
+              aria-label="Verification assertions evidence log"
+            >
+              {receipt.assertions.map((assert) => (
                 <div
                   key={assert.id}
                   className="p-2 rounded border bg-white flex flex-col gap-0.5 text-xs"
                   style={{ borderColor: "var(--border-neutral)" }}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="font-mono font-semibold text-gray-700">
-                      {assert.artifactId.split(".").pop()}
+                    <span className="font-mono font-semibold text-gray-700 break-all select-all">
+                      {assert.artifactId}
                     </span>
                     <span
                       className="font-bold text-[10px]"

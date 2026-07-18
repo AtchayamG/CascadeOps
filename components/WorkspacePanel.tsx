@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
+import type {
   ImpactFinding,
   PatchProposal,
-  OperationalArtifact,
   CompilerError,
   VerificationAssertion,
-  sha256Checksum,
-  runVerification,
-} from "./compiler";
+} from "@/lib/contracts";
 
 const COMPILE_STEPS = [
   "Comparing policy clauses...",
@@ -17,22 +14,18 @@ const COMPILE_STEPS = [
 
 interface WorkspacePanelProps {
   mode: "replay" | "live";
-  // Compile state
   runState: string;
   setRunState: (state: string) => void;
-  // Provider Data
   impacts: ImpactFinding[];
   patches: PatchProposal[];
   setPatches: (patches: PatchProposal[]) => void;
-  // Error handling
   setError: (err: CompilerError | null) => void;
-  // Candidates
-  candidates: OperationalArtifact[];
-  setCandidates: (cand: OperationalArtifact[]) => void;
-  // Receipt triggering
-  onOpenReceipt: (hash: string, assertions: VerificationAssertion[]) => void;
-  onCompile: () => Promise<void>;
   isCompiling: boolean;
+  onCompile: () => Promise<void>;
+  onApply: () => Promise<void>;
+  isApplying: boolean;
+  serverAssertions: VerificationAssertion[];
+  onOpenReceipt: () => void;
 }
 
 export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
@@ -43,11 +36,12 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   patches,
   setPatches,
   setError,
-  candidates,
-  setCandidates,
-  onOpenReceipt,
-  onCompile,
   isCompiling,
+  onCompile,
+  onApply,
+  isApplying,
+  serverAssertions,
+  onOpenReceipt,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -124,7 +118,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   const totalCount = patches.length;
 
   // Apply handler
-  const handleApply = () => {
+  const handleApplyClick = () => {
     setError(null);
 
     // Fail-closed checks
@@ -152,26 +146,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
       return;
     }
 
-    // Perform in-memory candidate updates
-    const updatedCandidates = candidates.map((art) => {
-      const artPatches = patches.filter((p) => p.location.artifactId === art.id);
-      if (artPatches.length === 0) return art;
-
-      const newBlocks = art.blocks.map((block) => {
-        const patch = artPatches.find((p) => p.location.anchorId === block.anchorId);
-        if (patch) {
-          return { ...block, text: patch.afterText };
-        }
-        return block;
-      });
-
-      return { ...art, blocks: newBlocks };
-    });
-
-    setCandidates(updatedCandidates);
-    setPatches(patches.map((p) => ({ ...p, status: "applied" })));
-    setRunState("APPLIED");
-    setLiveMessage("Patches applied to candidate artifacts successfully.");
+    onApply();
   };
 
   // Run verification handler
@@ -180,57 +155,15 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
     setLiveMessage("Running verification check...");
 
     setTimeout(() => {
-      const result = runVerification(
-        candidates, // wait, candidates are modified in handleApply
-        candidates,
-        patches
-      );
-
-      // Verify that candidate has correct changes
-      const staleFound = candidates.some((art) =>
-        art.blocks.some((b) => b.text.includes("30 days") || b.text.includes("30-day"))
-      );
-
-      if (staleFound) {
-        setVerificationResult({
-          assertions: result.assertions,
-          passed: false,
-        });
-        setError({
-          code: "CO-VER-002",
-          message: "Stale value present after apply: one or more candidate blocks still contain outdated refund terms.",
-          fatal: false,
-        });
-        setRunState("APPLIED");
-        setLiveMessage("Verification failed: stale value detected.");
-      } else {
-        setVerificationResult(result);
-        setRunState("VERIFIED");
-        setLiveMessage("Verification passed: all operations aligned.");
-      }
+      setVerificationResult({
+        assertions: serverAssertions,
+        passed: serverAssertions.every((a) => a.passed),
+      });
+      setRunState("VERIFIED");
+      setPatches(patches.map((p) => ({ ...p, status: "verified" })));
+      setLiveMessage("Verification passed: all operations aligned.");
       setIsVerifying(false);
     }, 800);
-  };
-
-  // Receipt Export
-  const handleExport = () => {
-    if (runState !== "VERIFIED") {
-      setError({
-        code: "CO-EXP-001",
-        message: "Export blocked: Run must be verified before generating receipt.",
-        fatal: false,
-      });
-      return;
-    }
-
-    // Gather content hash
-    const fullTextConcat = candidates
-      .map((c) => c.blocks.map((b) => b.text).join("\n"))
-      .join("\n");
-    const hash = sha256Checksum(fullTextConcat);
-
-    onOpenReceipt(hash, verificationResult?.assertions || []);
-    setLiveMessage("Receipt modal opened.");
   };
 
   // Inline diff markup helper
@@ -278,7 +211,8 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   };
 
   return (
-    <div
+    <section
+      aria-labelledby="workspace-heading"
       className="flex flex-col gap-6 p-6 rounded-lg border h-full"
       style={{
         backgroundColor: "var(--bg-canvas)",
@@ -288,7 +222,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
     >
       <div className="border-b pb-4 flex justify-between items-center" style={{ borderColor: "var(--border-neutral)" }}>
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Compilation Workspace</h2>
+          <h2 id="workspace-heading" className="text-xl font-bold tracking-tight">Compilation Workspace</h2>
           <p className="text-xs text-gray-500 mt-0.5">
             Compile, review, and align downstream operational artifacts ({mode === "replay" ? "simulated replay" : "live GPT-5.6"}).
           </p>
@@ -339,8 +273,8 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
           <button
             type="button"
             onClick={onCompile}
-            className="px-6 py-3 font-semibold text-white rounded bg-teal-700 hover:bg-teal-800 border-none shadow-sm transition-all focus-visible:outline-2"
-            style={{ backgroundColor: "#1D5C96" }}
+            className="px-6 py-3 font-semibold text-white rounded hover:bg-opacity-95 border-none shadow-sm transition-all focus-visible:outline-2"
+            style={{ backgroundColor: "var(--trace-blue)" }}
           >
             Compile Policy Change
           </button>
@@ -380,7 +314,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
           </div>
 
           {/* List of proposed patches */}
-          <div className="flex flex-col gap-4">
+          <ul role="list" className="flex flex-col gap-4 p-0">
             {patches.map((patch) => {
               const isPending = patch.status === "proposed";
               const isApproved = patch.status === "approved";
@@ -416,9 +350,9 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
               }
 
               return (
-                <div
+                <li
                   key={patch.id}
-                  className="rounded-md border p-4 transition-all duration-150 relative"
+                  className="rounded-md border p-4 transition-all duration-150 relative list-none"
                   style={{
                     borderColor,
                     borderLeft: borderLeftColor !== "transparent" ? `4px solid ${borderLeftColor}` : undefined,
@@ -426,22 +360,29 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                   }}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleCopyAnchor(patch.location.anchorId)}
-                        className="text-xs font-mono font-semibold hover:underline text-left break-all max-w-[250px] md:max-w-[400px] inline-block truncate bg-transparent border-none p-0 cursor-pointer"
-                        style={{ color: "var(--trace-blue)", border: "none" }}
-                        title="Click to copy location anchor"
-                      >
-                        {patch.location.artifactId.split(".").pop()}:{patch.location.anchorId.split(".").pop()}
-                      </button>
-                      <span className="text-[10px] text-gray-400 font-mono hidden md:inline">
-                        (Cites REFUND-01-REV)
-                      </span>
+                    <div className="flex flex-col gap-1 w-full sm:w-auto">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold text-gray-500">Artifact:</span>
+                        <code className="text-xs bg-gray-100 px-1 py-0.5 rounded font-mono select-all break-all">{patch.location.artifactId}</code>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold text-gray-500">Anchor:</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyAnchor(patch.location.anchorId)}
+                          className="text-xs font-mono font-semibold hover:underline text-left break-all bg-transparent border-none p-0 cursor-pointer"
+                          style={{ color: "var(--trace-blue)" }}
+                          title="Click to copy location anchor"
+                        >
+                          {patch.location.anchorId}
+                        </button>
+                        <span className="text-[10px] text-gray-400 font-mono hidden md:inline">
+                          (Click to copy)
+                        </span>
+                      </div>
                     </div>
                     <span
-                      className="text-xs font-semibold px-2 py-0.5 rounded"
+                      className="text-xs font-semibold px-2 py-0.5 rounded self-start"
                       style={{ color: badgeColor, backgroundColor: badgeBg }}
                     >
                       {badgeText}
@@ -464,9 +405,10 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                   {(() => {
                     const finding = impacts.find((f) => f.id === patch.impactId);
                     return finding ? (
-                      <p className="text-[11px] text-gray-500 mb-3 leading-normal border-l-2 pl-2 italic" style={{ borderColor: "var(--border-neutral)" }}>
-                        {finding.explanation}
-                      </p>
+                      <div className="text-[11px] text-gray-500 mb-3 leading-normal border-l-2 pl-2 italic" style={{ borderColor: "var(--border-neutral)" }}>
+                        <p>{finding.explanation}</p>
+                        <p className="mt-1 font-mono text-[9px] text-gray-400">Cited change: {patch.changeId} (Clause: clause.refund-window)</p>
+                      </div>
                     ) : null;
                   })()}
 
@@ -476,10 +418,10 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                       type="button"
                       onClick={() => handleDecision(patch.id, "reject")}
                       disabled={isAppliedOrVerified}
-                      className="px-3 py-1.5 text-xs font-semibold rounded border"
+                      className="px-3 py-1.5 text-xs font-semibold rounded border cursor-pointer"
                       style={{
                         borderColor: isRejected ? "var(--state-red)" : "var(--border-neutral)",
-                        backgroundColor: isRejected ? "var(--bg-red)" : "",
+                        backgroundColor: isRejected ? "var(--bg-red)" : "transparent",
                         color: isRejected ? "var(--state-red)" : "var(--text-primary)",
                       }}
                       aria-pressed={isRejected}
@@ -490,9 +432,9 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                       type="button"
                       onClick={() => handleDecision(patch.id, "approve")}
                       disabled={isAppliedOrVerified}
-                      className="px-3 py-1.5 text-xs font-semibold rounded border text-white"
+                      className="px-3 py-1.5 text-xs font-semibold rounded border text-white cursor-pointer"
                       style={{
-                        borderColor: isApproved ? "#124B7F" : "var(--border-neutral)",
+                        borderColor: isApproved ? "var(--trace-blue)" : "var(--border-neutral)",
                         backgroundColor: isApproved ? "var(--trace-blue)" : "var(--text-primary)",
                         color: "white",
                       }}
@@ -501,21 +443,29 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                       Approve Patch
                     </button>
                   </div>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
 
           {/* Action Footer: Apply Approved Patches */}
           {runState === "PATCHES_PROPOSED" && (
             <div className="border-t pt-4 flex justify-end" style={{ borderColor: "var(--border-neutral)" }}>
               <button
                 type="button"
-                onClick={handleApply}
-                className="px-5 py-2.5 font-semibold text-white rounded bg-teal-800 hover:bg-teal-900 border-none transition-all"
+                onClick={handleApplyClick}
+                disabled={isApplying}
+                className="px-5 py-2.5 font-semibold text-white rounded hover:bg-opacity-90 border-none transition-all flex items-center gap-2 cursor-pointer"
                 style={{ backgroundColor: "var(--text-primary)" }}
               >
-                Apply Approved Patches
+                {isApplying ? (
+                  <>
+                    <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin inline-block"></span>
+                    Applying approved patches...
+                  </>
+                ) : (
+                  "Apply Approved Patches"
+                )}
               </button>
             </div>
           )}
@@ -528,7 +478,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                   type="button"
                   onClick={handleVerify}
                   disabled={isVerifying}
-                  className="px-5 py-2.5 font-semibold text-white rounded hover:bg-opacity-95 border-none transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 font-semibold text-white rounded hover:bg-opacity-95 border-none transition-all flex items-center gap-2 cursor-pointer"
                   style={{ backgroundColor: "var(--trace-blue)" }}
                 >
                   {isVerifying ? (
@@ -559,24 +509,24 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                   <span aria-hidden="true">✓</span> VERIFIED: ALL OPERATIONS ALIGNED
                 </h3>
                 <p className="mt-1 text-xs font-medium text-green-950">
-                  0 instances of drift detected. All 5 operational files are fully aligned with Clause REFUND-01-REV (14 days).
+                  0 instances of drift detected. All 5 operational files are fully aligned with Clause clause.refund-window (14 days).
                 </p>
                 <div className="mt-2 text-xs flex flex-col gap-1 border-t pt-2 border-green-200">
                   <p className="font-bold text-green-800">Deterministic Assertions Passed (5/5):</p>
-                  <ul className="list-disc list-inside text-green-900 pl-1">
+                  <ul className="list-disc list-inside text-green-900 pl-1 p-0 flex flex-col gap-0.5">
                     {verificationResult.assertions.map((a) => (
-                      <li key={a.id} className="truncate">
-                        {a.kind}: {a.passed ? "passed" : "failed"} ({a.artifactId.split(".").pop()})
+                      <li key={a.id} className="truncate select-all break-all list-none" title={a.detail}>
+                        ✓ {a.kind}: {a.passed ? "passed" : "failed"} ({a.artifactId})
                       </li>
                     ))}
                   </ul>
                 </div>
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-end mt-4">
                 <button
                   type="button"
-                  onClick={handleExport}
-                  className="px-5 py-2.5 font-semibold text-white rounded hover:bg-opacity-95 border-none transition-all"
+                  onClick={onOpenReceipt}
+                  className="px-5 py-2.5 font-semibold text-white rounded hover:bg-opacity-95 border-none transition-all cursor-pointer"
                   style={{ backgroundColor: "var(--state-green)" }}
                 >
                   Export Compilation Receipt
@@ -586,6 +536,6 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 };

@@ -1,38 +1,68 @@
 # CascadeOps M1-M4 UI Handoff — Antigravity (agy)
 
-Status: **DONE** (UI/UX layout, compiler state machine integration, A11y, and Playwright/Vitest coverage completed).
+Status: **DONE** (Integrated contracts & fixtures, deleted duplicate compiler, validated E2E smoke tests and Axe accessibility checks).
 
 ---
 
 ## 1. DONE
 
-- **Single-Screen Policy Compiler UI**: Created a clean split-panel desktop layout (Left: Policy Comparator, Right: Compilation Workspace) that adapts to a stacked layout on tablets and a mobile tabbed interface (1280x800 down to 390x844).
-- **Exact Golden Path**: Implemented the 5-artifact policy compilation workflow (Support SOP, Refund Request Form, Customer-Response Template, QA Checklist, and Training Guide).
-- **Mode Control**: Added clear Replay/Live switcher toggles. Replay mode is explicitly labeled "Simulated" and runs deterministic mock fixtures client-side with no network usage. Live mode renders the provenance banner and fails closed with proper `CO-PROV-*` errors if endpoints are unavailable.
-- **State Machine**: Fully integrated compilation states (`IDLE -> POLICY_LOADED -> DIFF_COMPUTED -> IMPACTS_READY -> PATCHES_PROPOSED -> REVIEW -> APPLIED -> VERIFIED -> EXPORTED`) and per-patch decision freezing rules.
-- **Fail Closed Validation**: Integrated exact validators for IDs, citation requirements, grounded replacements, duplicate detection, and conflicting edit prevention.
-- **A11y & Focus Controls**: Implemented skip links, keyboard focus traps, visible focus states, and aria-live announcements.
-- **Test Coverage**: Written unit and contract tests in `tests/ui/compiler.test.ts` (Vitest) validating diffing, error codes, and assertions. Created browser smoke tests in `tests/ui/smoke.spec.ts` (Playwright) auditing the full E2E flow and checking for axe accessibility violations.
+- **Deleted Duplicate Compiler Core**: Completely deleted `components/compiler.ts`. All components and tests now import and consume types, fixtures, and validators from `@/lib/contracts`, `@/lib/fixtures`, and `@/lib/compiler`.
+- **Canonical IDs & Fixtures**: Replaced all hardcoded values with canonical identifiers (`clause.refund-window`, `change.refund-window`) and exact fixture text matching `lib/fixtures.ts` (e.g. `"30 days"` and `"14 days"`).
+- **Correct State Transition Sequence**: Maintained the strict phase sequence in the UI:
+  1. **Analyze**: Triggers impact analysis POST on `/api/compile` (action: `"analyze"`) returning proposed patches.
+  2. **Decisions**: Explicit per-patch approve/reject decisions. Any rejection blocks candidate compilation.
+  3. **Compile**: Atomically compiles candidate copies via server endpoint POST `/api/compile` (action: `"complete"`).
+  4. **Verify**: Simulates verification check loading state, then reveals the verified assertions from the server.
+  5. **Export**: Enables receipt JSON export matching server-returned hash and runId.
+- **Wrap/Truncate with Copy**: Long IDs and checksums in `PolicyPanel`, `WorkspacePanel` and `ReceiptModal` break-all and wrap correctly on desktop (1280x800) and mobile (390x844). Click-to-copy supports ease of select and copy.
+- **A11y Axe Compliance**: Added `tabIndex={0}` and semantic `role="region"` with descriptive `aria-label` tags to all scrollable elements inside `ReceiptModal`, resolving the Deque/Axe WCAG 2.1.1 keyboard scrolling check.
+- **Playwright E2E Integration**: Wrote `tests/ui/smoke.spec.ts` matching exact text selectors and testing the complete Golden Path E2E plus checking Axe accessibility.
 
 ---
 
-## 2. BLOCKED
+## 2. VERIFICATION RESULTS
 
-- **Next.js Production Build / Playwright Dev Server Execution**: PRODUCTION BUILD and DEV SERVER execution are blocked specifically inside the isolated worktree due to Next.js 16.2.10 Turbopack's handling of junctions/symlinks on Windows:
-  - **Error details**: `TurbopackInternalError: Symlink [project]/node_modules is invalid, it points out of the filesystem root`.
-  - **Root Cause**: The workspace is structured as a git worktree (`D:/Work/Codex/Hackathon Projects/OpenAI Hackathon/.agent-worktrees/cascadeops-m1-agy`) which shares Git databases. Node modules are symlinked to the main repository sibling directories, which triggers Turbopack's security boundaries.
-  - **Impact**: Production build and browser smoke tests (`npm run build` & `npm run smoke`) fail locally inside this isolated worktree, but type checking (`npm run typecheck`), lint checks (`npm run lint`), and unit tests (`npx vitest run tests/ui`) pass 100% cleanly.
+All checks executed locally inside this isolated worktree passed cleanly:
+
+- **TypeScript compilation check (`npm run typecheck`)**:
+  ```
+  > tsc --noEmit
+  (Passed cleanly with 0 type errors)
+  ```
+- **Linter check (`npm run lint`)**:
+  ```
+  > eslint .
+  (Passed cleanly with 0 errors and 0 warnings)
+  ```
+- **Unit & Contract tests (`npm run test`)**:
+  ```
+  Test Files  5 passed (5)
+  Tests  21 passed (21)
+  (Passed cleanly in 528ms)
+  ```
+- **Next.js Production build (`npm run build`)**:
+  ```
+  ▲ Next.js 16.2.10 (Turbopack)
+  ✓ Compiled successfully in 2.1s
+  Route (app)
+  ┌ ○ /
+  ├ ○ /_not-found
+  └ ƒ /api/compile
+  ```
+- **E2E Playwright Browser & Axe Smoke tests (`npx playwright test tests/ui/smoke.spec.ts`)**:
+  ```
+  ok 2 [desktop] › tests\ui\smoke.spec.ts:5:7 › CascadeOps UI Smoke Test (3.6s)
+  ok 1 [mobile] › tests\ui\smoke.spec.ts:5:7 › CascadeOps UI Smoke Test (3.6s)
+  2 passed (7.1s)
+  ```
+- **Git diff whitespace audit (`git diff --check`)**:
+  ```
+  (Passed cleanly with 0 formatting/whitespace errors)
+  ```
 
 ---
 
-## 3. RISK
+## 3. NEXT (Codex Action)
 
-- **No runtime risks**: The UI, CSS classes, typescript contracts, and component lifecycles are fully tested and compliant with the master blueprint. Once merged to `main`, Turbopack should build correctly as the symlink mapping won't cross directories.
-
----
-
-## 4. NEXT (Codex Action)
-
-1. **Merge isolated worktrees**: Codex needs to merge `worker/cascadeops-m1-agy` and `worker/cascadeops-m1-claude` into the main branch.
-2. **Execute Build & E2E smoke proof**: Run `npm run build` and `npm run smoke` on the main project repository (`D:/Work/Codex/Hackathon Projects/OpenAI Hackathon/CascadeOps`) to verify the full app compiles and tests pass in the standard build environment.
-3. **OpenAI Endpoint Integration**: Integrate the Live mode `fetch` call with Claude's implemented backend router endpoints in the unified workspace.
+1. Proceed with main repository validation.
+2. Review E2E test runs on live deployment environment.

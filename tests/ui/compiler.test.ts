@@ -1,18 +1,85 @@
 import { describe, it, expect } from "vitest";
 import {
-  computePolicyDiff,
-  validateImpactFindings,
-  validatePatchProposals,
-  runVerification,
-  FIXTURE_POLICY_V1,
-  FIXTURE_POLICY_V2,
-  FIXTURE_ARTIFACTS,
-  REPLAY_IMPACT_FINDINGS,
-  REPLAY_PATCH_PROPOSALS,
+  diffPolicies,
+  validateImpacts,
+  validatePatches,
+  verifyCandidates,
+} from "../../lib/compiler";
+import {
+  POLICY_V1,
+  POLICY_V2,
+  ARTIFACTS,
+  EXPECTED_IMPACTS,
+  EXPECTED_PATCHES,
+  STALE_VALUES,
+  NEW_VALUES,
+} from "../../lib/fixtures";
+import type {
   ImpactFinding,
   PatchProposal,
   OperationalArtifact,
-} from "../../components/compiler";
+  ClauseChange,
+  PolicyDocument,
+  CompilerError,
+} from "../../lib/contracts";
+import { CompilerFailure } from "../../lib/contracts";
+
+function computePolicyDiff(v1: PolicyDocument, v2: PolicyDocument): ClauseChange[] {
+  return diffPolicies(v1, v2);
+}
+
+function validateImpactFindings(
+  findings: ImpactFinding[],
+  changes: ClauseChange[],
+  artifacts: OperationalArtifact[],
+): CompilerError[] {
+  try {
+    validateImpacts(findings, { changes, artifacts });
+    return [];
+  } catch (error) {
+    if (error instanceof CompilerFailure) {
+      return [error.error];
+    }
+    throw error;
+  }
+}
+
+function validatePatchProposals(
+  patches: PatchProposal[],
+  findings: ImpactFinding[],
+  artifacts: OperationalArtifact[],
+): CompilerError[] {
+  try {
+    const changes = diffPolicies(POLICY_V1, POLICY_V2);
+    validatePatches(patches, { changes, artifacts, findings });
+    return [];
+  } catch (error) {
+    if (error instanceof CompilerFailure) {
+      return [error.error];
+    }
+    throw error;
+  }
+}
+
+function runVerification(
+  originals: OperationalArtifact[],
+  candidates: OperationalArtifact[],
+  appliedPatches: PatchProposal[],
+) {
+  const assertions = verifyCandidates(
+    originals,
+    candidates,
+    appliedPatches.map((p) => ({ ...p, status: "applied" })),
+    { staleValues: STALE_VALUES, newValues: NEW_VALUES }
+  );
+  return { assertions, passed: assertions.every((a) => a.passed) };
+}
+
+const FIXTURE_POLICY_V1 = POLICY_V1;
+const FIXTURE_POLICY_V2 = POLICY_V2;
+const FIXTURE_ARTIFACTS = ARTIFACTS;
+const REPLAY_IMPACT_FINDINGS = EXPECTED_IMPACTS;
+const REPLAY_PATCH_PROPOSALS = EXPECTED_PATCHES;
 
 describe("CascadeOps Compiler Core", () => {
   describe("Policy Diff", () => {
@@ -21,8 +88,8 @@ describe("CascadeOps Compiler Core", () => {
       expect(changes).toHaveLength(1);
       expect(changes[0].clauseId).toBe("clause.refund-window");
       expect(changes[0].changeType).toBe("modified");
-      expect(changes[0].beforeText).toContain("thirty (30) days");
-      expect(changes[0].afterText).toContain("fourteen (14) days");
+      expect(changes[0].beforeText).toContain("30 days");
+      expect(changes[0].afterText).toContain("14 days");
     });
   });
 
@@ -135,7 +202,7 @@ describe("CascadeOps Compiler Core", () => {
       const badCandidates = JSON.parse(JSON.stringify(FIXTURE_ARTIFACTS)) as OperationalArtifact[];
       const step2Block = badCandidates[0].blocks.find((b) => b.anchorId === "sop.step-2.eligibility");
       if (step2Block) {
-        step2Block.text = "- Verify that the order timestamp is within the 30-day window."; // Unmodified
+        step2Block.text = "Step 2: Confirm the purchase was made within the last 30 days before approving the refund."; // Unmodified
       }
 
       const result = runVerification(FIXTURE_ARTIFACTS, badCandidates, REPLAY_PATCH_PROPOSALS);

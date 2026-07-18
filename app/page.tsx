@@ -1,24 +1,60 @@
 "use client";
 
 import { useState } from "react";
-import {
+import type {
   ProviderMode,
-  FIXTURE_POLICY_V1,
-  FIXTURE_POLICY_V2,
-  FIXTURE_ARTIFACTS,
-  computePolicyDiff,
-  REPLAY_IMPACT_FINDINGS,
-  REPLAY_PATCH_PROPOSALS,
   ImpactFinding,
   PatchProposal,
   OperationalArtifact,
   CompilerError,
   VerificationAssertion,
-} from "../components/compiler";
-import { PolicyPanel } from "../components/PolicyPanel";
-import { WorkspacePanel } from "../components/WorkspacePanel";
-import { ReceiptModal } from "../components/ReceiptModal";
-import { ErrorBanner } from "../components/ErrorBanner";
+  CompilationReceipt,
+  ApprovalDecision,
+} from "@/lib/contracts";
+import { POLICY_V1, POLICY_V2, ARTIFACTS } from "@/lib/fixtures";
+import { PolicyPanel } from "@/components/PolicyPanel";
+import { WorkspacePanel } from "@/components/WorkspacePanel";
+import { ReceiptModal } from "@/components/ReceiptModal";
+import { ErrorBanner } from "@/components/ErrorBanner";
+
+// Browser-safe policy diffing helper matching the core compiler diff logic
+function computePolicyDiff(v1: typeof POLICY_V1, v2: typeof POLICY_V2) {
+  const changes = [];
+  const toById = new Map(v2.clauses.map((c) => [c.id, c]));
+  for (const before of v1.clauses) {
+    const after = toById.get(before.id);
+    if (!after) {
+      changes.push({
+        id: before.id.replace(/^clause\./, "change."),
+        clauseId: before.id,
+        changeType: "removed" as const,
+        beforeText: before.text,
+        afterText: null,
+      });
+    } else if (after.text !== before.text) {
+      changes.push({
+        id: before.id.replace(/^clause\./, "change."),
+        clauseId: before.id,
+        changeType: "modified" as const,
+        beforeText: before.text,
+        afterText: after.text,
+      });
+    }
+  }
+  const fromIds = new Set(v1.clauses.map((c) => c.id));
+  for (const added of v2.clauses) {
+    if (!fromIds.has(added.id)) {
+      changes.push({
+        id: added.id.replace(/^clause\./, "change."),
+        clauseId: added.id,
+        changeType: "added" as const,
+        beforeText: null,
+        afterText: added.text,
+      });
+    }
+  }
+  return changes;
+}
 
 export default function Home() {
   // Provider Mode state
@@ -27,11 +63,14 @@ export default function Home() {
   // State machine state
   const [runState, setRunState] = useState<string>("IDLE");
   const [isCompiling, setIsCompiling] = useState<boolean>(false);
+  const [isApplying, setIsApplying] = useState<boolean>(false);
 
   // Data state
   const [impacts, setImpacts] = useState<ImpactFinding[]>([]);
   const [patches, setPatches] = useState<PatchProposal[]>([]);
-  const [candidates, setCandidates] = useState<OperationalArtifact[]>(FIXTURE_ARTIFACTS);
+  const [, setCandidates] = useState<OperationalArtifact[]>(ARTIFACTS);
+  const [serverAssertions, setServerAssertions] = useState<VerificationAssertion[]>([]);
+  const [receipt, setReceipt] = useState<CompilationReceipt | null>(null);
 
   // Compilation Errors
   const [error, setError] = useState<CompilerError | null>(null);
@@ -41,70 +80,115 @@ export default function Home() {
 
   // Receipt Modal state
   const [isReceiptOpen, setIsReceiptOpen] = useState<boolean>(false);
-  const [receiptHash, setReceiptHash] = useState<string>("");
-  const [receiptAssertions, setReceiptAssertions] = useState<VerificationAssertion[]>([]);
 
   // Compute diff on the fly
-  const changes = computePolicyDiff(FIXTURE_POLICY_V1, FIXTURE_POLICY_V2);
+  const changes = computePolicyDiff(POLICY_V1, POLICY_V2);
 
   // Run compilation
   const handleCompile = async () => {
     setError(null);
     setIsCompiling(true);
+    setImpacts([]);
+    setPatches([]);
+    setCandidates(ARTIFACTS);
+    setServerAssertions([]);
+    setReceipt(null);
 
-    if (mode === "replay") {
-      // Replay mode: local deterministic simulation
-      setTimeout(() => {
-        setImpacts(REPLAY_IMPACT_FINDINGS);
-        // Deep copy of proposed patches
-        setPatches(JSON.parse(JSON.stringify(REPLAY_PATCH_PROPOSALS)));
-        setCandidates(JSON.parse(JSON.stringify(FIXTURE_ARTIFACTS)));
-        setRunState("PATCHES_PROPOSED");
-        setIsCompiling(false);
-      }, 1000);
-    } else {
-      // Live mode: call server-side API (fails closed if API is not deployed on this branch)
-      setTimeout(async () => {
-        try {
-          const res = await fetch("/api/live/propose-impacts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              change: changes[0],
-              artifacts: FIXTURE_ARTIFACTS,
-            }),
-          });
+    try {
+      const res = await fetch("/api/compile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "analyze",
+          mode,
+        }),
+      });
 
-          if (!res.ok) {
-            throw new Error("404 Not Found");
-          }
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError(data.error || { code: "CO-STATE-001", message: "Compilation analysis failed.", fatal: true });
+        setRunState("IDLE");
+        return;
+      }
 
-          // If by any chance it succeeds (e.g. backend agent implemented it)
-          const data = await res.json();
-          setImpacts(data.payload);
-          setRunState("IMPACTS_READY");
-        } catch {
-          setError({
-            code: "CO-PROV-001",
-            message: "Live provider unavailable: OpenAI API gateway or Live endpoints are not deployed in this isolated UI worktree.",
-            fatal: true,
-          });
-          setRunState("IDLE");
-        } finally {
-          setIsCompiling(false);
-        }
-      }, 1000);
+      const { impactEnvelope, patchEnvelope } = data.data;
+      setImpacts(impactEnvelope.payload);
+      // Map patches from API into proposed status initially for UI decisions review
+      setPatches(
+        patchEnvelope.payload.map((p: PatchProposal) => ({
+          ...p,
+          status: "proposed" as const,
+        }))
+      );
+      setRunState("PATCHES_PROPOSED");
+    } catch {
+      setError({
+        code: "CO-STATE-001",
+        message: "An unexpected error occurred during impact analysis.",
+        fatal: true,
+      });
+      setRunState("IDLE");
+    } finally {
+      setIsCompiling(false);
+    }
+  };
+
+  // Apply handler calling server atomic compiler
+  const handleApply = async () => {
+    setError(null);
+    setIsApplying(true);
+
+    const decisions: ApprovalDecision[] = patches.map((p) => ({
+      patchId: p.id,
+      decision: p.status === "approved" ? "approve" : "reject",
+      decidedAt: new Date().toISOString(),
+    }));
+
+    try {
+      const res = await fetch("/api/compile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "complete",
+          mode,
+          impacts,
+          patches,
+          decisions,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError(data.error || { code: "CO-STATE-001", message: "Compilation apply failed.", fatal: true });
+        return;
+      }
+
+      const { candidates: compiledCandidates, assertions, receipt: compiledReceipt } = data.data;
+      setCandidates(compiledCandidates);
+      setPatches(patches.map((p) => ({ ...p, status: "applied" as const })));
+      setServerAssertions(assertions);
+      setReceipt(compiledReceipt);
+      setRunState("APPLIED");
+    } catch {
+      setError({
+        code: "CO-STATE-001",
+        message: "An unexpected error occurred while compiling patches.",
+        fatal: true,
+      });
+    } finally {
+      setIsApplying(false);
     }
   };
 
   // Toggle Mode helper
   const handleModeChange = (newMode: ProviderMode) => {
-    // Reset state when toggling modes to enforce clean state boundary
     setMode(newMode);
     setRunState("IDLE");
     setImpacts([]);
     setPatches([]);
-    setCandidates(JSON.parse(JSON.stringify(FIXTURE_ARTIFACTS)));
+    setCandidates(ARTIFACTS);
+    setServerAssertions([]);
+    setReceipt(null);
     setError(null);
   };
 
@@ -210,8 +294,8 @@ export default function Home() {
           {/* Column 1: Policy Comparator (Visible if tab selected on mobile, always on desktop) */}
           <div className={`${activeTab === "policy" ? "block" : "hidden"} lg:block`}>
             <PolicyPanel
-              originalPolicy={FIXTURE_POLICY_V1}
-              revisedPolicy={FIXTURE_POLICY_V2}
+              originalPolicy={POLICY_V1}
+              revisedPolicy={POLICY_V2}
               changes={changes}
             />
           </div>
@@ -226,15 +310,12 @@ export default function Home() {
               patches={patches}
               setPatches={setPatches}
               setError={setError}
-              candidates={candidates}
-              setCandidates={setCandidates}
               isCompiling={isCompiling}
               onCompile={handleCompile}
-              onOpenReceipt={(hash, assertions) => {
-                setReceiptHash(hash);
-                setReceiptAssertions(assertions);
-                setIsReceiptOpen(true);
-              }}
+              onApply={handleApply}
+              isApplying={isApplying}
+              serverAssertions={serverAssertions}
+              onOpenReceipt={() => setIsReceiptOpen(true)}
             />
           </div>
         </div>
@@ -248,13 +329,11 @@ export default function Home() {
       </footer>
 
       {/* Receipt Modal */}
-      {isReceiptOpen && (
+      {isReceiptOpen && receipt && (
         <ReceiptModal
           isOpen={isReceiptOpen}
           onClose={() => setIsReceiptOpen(false)}
-          mode={mode}
-          contentHash={receiptHash}
-          assertions={receiptAssertions}
+          receipt={receipt}
         />
       )}
     </main>

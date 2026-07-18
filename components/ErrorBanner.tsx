@@ -1,5 +1,5 @@
 import React from "react";
-import { CompilerError } from "./compiler";
+import { CompilerError } from "@/lib/contracts";
 
 interface ErrorBannerProps {
   error: CompilerError;
