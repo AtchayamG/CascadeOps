@@ -1,0 +1,29 @@
+You are correcting the CascadeOps M0 architecture pack in this worktree. Read AGENTS.md, the existing product/UX documents available on main if needed, and every file you are allowed to edit below. Make the architecture pack internally consistent with this locked P0 scope.
+
+LOCKED P0 DECISIONS
+- Exactly five operational artifacts and exactly five affected anchors, impacts, and patches: Support SOP, Refund Request Form, Customer Response Template, QA Checklist, Training Guide.
+- One affected anchor and one patch per artifact. Remove every distractor anchor and every seven-count or 6/7 claim.
+- Golden path: load fixture -> identify one refund-window change (30 days to 14 days) -> produce 5 cited impacts -> produce 5 grounded patches -> explicitly approve all 5 -> apply to isolated candidates -> deterministic verification passes with zero stale target references -> export a compilation receipt.
+- A rejection is covered only by a separate negative/alternate test. It must not appear in the golden path or successful demo. Define a deliberate, consistent state transition that permits changing a proposed/rejected decision before apply, or otherwise document the alternate run cleanly.
+- Replay is deterministic and visibly simulated. Live uses GPT-5.6 Responses API Structured Outputs with store:false and never silently falls back.
+- Verification is deterministic and model-free.
+- Every impact and patch cites the exact source clause and exact target anchor. Fabricated/unknown IDs and beforeText mismatches fail closed.
+- SHA-256 is a content checksum only, never a signature or seal.
+- Never claim production scanning, legal/compliance certification, sealed evidence, cryptographic signing, or eliminated operational drift.
+- P0 makes no external enterprise writes. Export requires explicit human approval.
+
+EDIT ONLY
+- docs/blueprint/CASCADEOPS_MASTER_BLUEPRINT_v1.md
+- docs/architecture/SYSTEM_ARCHITECTURE.md
+- docs/architecture/DATA_CONTRACTS.md
+- docs/architecture/adr/ADR-001-single-nextjs-application.md
+- docs/architecture/adr/ADR-002-strict-policy-compilation-contract.md
+- docs/architecture/adr/ADR-003-explicit-live-and-replay-providers.md
+- docs/architecture/adr/ADR-004-human-approved-patch-state-machine.md
+- docs/architecture/adr/ADR-005-deterministic-verification-before-export.md
+- docs/security/THREAT_MODEL.md
+- docs/testing/TEST_STRATEGY.md
+- docs/evaluation/EVALUATION_PLAN.md
+- docs/project/worker-handoffs/m0-claude.md
+
+Update all counts, examples, state diagrams, acceptance criteria, tests, metrics, and handoff notes. Do not create application code or new files. Run git diff --check and report a concise handoff with exact verification performed.
