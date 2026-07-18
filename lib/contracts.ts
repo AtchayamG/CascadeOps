@@ -57,9 +57,9 @@ export const OperationalArtifactSchema = z.strictObject({
 export type OperationalArtifact = z.infer<typeof OperationalArtifactSchema>;
 
 export const ArtifactLocationSchema = z.strictObject({
-  artifactId: z.string().min(1),
-  anchorId: z.string().min(1),
-  excerpt: z.string().min(1),
+  artifactId: z.string().min(1).describe("Exact supplied operational artifact id"),
+  anchorId: z.string().min(1).describe("Exact supplied location anchor id within the artifact"),
+  excerpt: z.string().min(1).describe("Exact current text copied byte-for-byte from the target anchor"),
 });
 export type ArtifactLocation = z.infer<typeof ArtifactLocationSchema>;
 
@@ -71,9 +71,9 @@ export const ArtifactDependencySchema = z.strictObject({
 export type ArtifactDependency = z.infer<typeof ArtifactDependencySchema>;
 
 export const ImpactFindingSchema = z.strictObject({
-  id: z.string().min(1),
-  changeId: z.string().min(1),
-  clauseId: z.string().min(1),
+  id: z.string().min(1).describe("Impact id: impact.1 through impact.5"),
+  changeId: z.string().min(1).describe("Must be change.refund-window"),
+  clauseId: z.string().min(1).describe("Must be clause.refund-window"),
   location: ArtifactLocationSchema,
   severity: z.enum(["must-update", "review-recommended"]),
   explanation: z.string().min(1),
@@ -92,13 +92,13 @@ export type PatchStatus = z.infer<typeof PatchStatusSchema>;
 
 export const PatchProposalSchema = z
   .strictObject({
-    id: z.string().min(1),
-    impactId: z.string().min(1),
-    changeId: z.string().min(1),
+    id: z.string().min(1).describe("Patch id: patch.1 through patch.5"),
+    impactId: z.string().min(1).describe("Exact id of the corresponding supplied Impact Finding"),
+    changeId: z.string().min(1).describe("Must be change.refund-window"),
     location: ArtifactLocationSchema,
-    beforeText: z.string().min(1),
-    afterText: z.string().min(1),
-    status: PatchStatusSchema,
+    beforeText: z.string().min(1).describe("Exact target anchor text copied byte-for-byte"),
+    afterText: z.string().min(1).describe("beforeText with only 30 days/30-day replaced by 14 days/14-day"),
+    status: PatchStatusSchema.describe("Must be proposed"),
   })
   .superRefine((p, ctx) => {
     if (p.afterText === p.beforeText) {
