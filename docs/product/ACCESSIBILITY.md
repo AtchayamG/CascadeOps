@@ -59,7 +59,7 @@ While visual users may see a graph layout of dependencies, screen reader users r
     <tbody>
       <tr>
         <th scope="row">Support SOP (sop.md)</th>
-        <td>Section 3.2, Line 45</td>
+        <td><code>sop.step-2.eligibility</code></td>
         <td><span aria-label="Status: Pending Review">Pending Review</span></td>
       </tr>
       <!-- Additional rows for the other 4 artifacts -->

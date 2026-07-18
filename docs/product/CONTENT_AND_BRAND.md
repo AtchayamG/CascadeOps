@@ -58,10 +58,10 @@ This section contains the exact string constants to be rendered in the user inte
 ### 4.2. Policy Change Panel (Left Column)
 * **Title**: `Source Policy Revision`
 * **Active Project Label**: `Refund Policy Amendment (M0 Golden Path)`
-* **Original Policy Card Header**: `Original Clause (REFUND-01)`
-* **Original Text**: `"Customers may request a full refund within thirty (30) days of purchase."`
-* **Revised Policy Card Header**: `Revised Clause (REFUND-01-REV)`
-* **Revised Text**: `"Customers may request a full refund within fourteen (14) days of purchase."`
+* **Original Policy Card Header**: `Original — clause.refund-window (v1)`
+* **Original Text**: `"Customers may request a refund within 30 days of purchase."`
+* **Revised Policy Card Header**: `Revised — clause.refund-window (v2)`
+* **Revised Text**: `"Customers may request a refund within 14 days of purchase."`
 
 ### 4.3. Compilation Workspace (Right Column)
 * **Primary Compile Button (Idle)**: `Compile Policy Change`
@@ -71,52 +71,53 @@ This section contains the exact string constants to be rendered in the user inte
 ### 4.4. The 5 Curated Operational Patches (Before Approval)
 
 #### Patch 1: Support SOP
-* **Location Reference**: `docs/operations/sop.md#L45`
-* **Source Link**: `Linked to Clause REFUND-01-REV`
-* **Old Text**: `"- Verify that the order timestamp is within the 30-day window."`
-* **New Text**: `"- Verify that the order timestamp is within the 14-day window."`
+* **Location Reference**: `artifact.support-sop / sop.step-2.eligibility`
+* **Source Link**: `Source: change.refund-window`
+* **Old Text**: `"purchase was made within the last 30 days"`
+* **New Text**: `"purchase was made within the last 14 days"`
 * **Actions**: `[ Approve Patch ]` `[ Reject Patch ]`
 
 #### Patch 2: Refund Request Form
-* **Location Reference**: `docs/templates/refund_form.json#L12`
-* **Source Link**: `Linked to Clause REFUND-01-REV`
-* **Old Text**: `"description": "Refunds must be requested within 30 days of the purchase date."`
-* **New Text**: `"description": "Refunds must be requested within 14 days of the purchase date."`
+* **Location Reference**: `artifact.refund-request-form / form.field.purchase-date.help`
+* **Source Link**: `Source: change.refund-window`
+* **Old Text**: `"Purchases older than 30 days are not eligible"`
+* **New Text**: `"Purchases older than 14 days are not eligible"`
 * **Actions**: `[ Approve Patch ]` `[ Reject Patch ]`
 
 #### Patch 3: Customer-Response Template
-* **Location Reference**: `docs/macros/customer_decline_response.txt#L8`
-* **Source Link**: `Linked to Clause REFUND-01-REV`
-* **Old Text**: `"Because your request falls outside our 30-day refund window..."`
-* **New Text**: `"Because your request falls outside our 14-day refund window..."`
+* **Location Reference**: `artifact.customer-response-template / template.body.window-sentence`
+* **Source Link**: `Source: change.refund-window`
+* **Old Text**: `"within 30 days of your purchase"`
+* **New Text**: `"within 14 days of your purchase"`
 * **Actions**: `[ Approve Patch ]` `[ Reject Patch ]`
 
 #### Patch 4: QA Checklist
-* **Location Reference**: `docs/qa/checklist.md#L22`
-* **Source Link**: `Linked to Clause REFUND-01-REV`
-* **Old Text**: `"* Confirm request date is <= 30 days from purchase date."`
-* **New Text**: `"* Confirm request date is <= 14 days from purchase date."`
+* **Location Reference**: `artifact.qa-checklist / qa.item-4.window-check`
+* **Source Link**: `Source: change.refund-window`
+* **Old Text**: `"confirmed purchase within 30 days"`
+* **New Text**: `"confirmed purchase within 14 days"`
 * **Actions**: `[ Approve Patch ]` `[ Reject Patch ]`
 
 #### Patch 5: Training Guide
-* **Location Reference**: `docs/training/onboarding_guide.md#L88`
-* **Source Link**: `Linked to Clause REFUND-01-REV`
-* **Old Text**: `"We maintain a 30-day refund window for standard customers."`
-* **New Text**: `"We maintain a 14-day refund window for standard customers."`
+* **Location Reference**: `artifact.training-guide / guide.section-2.policy-summary`
+* **Source Link**: `Source: change.refund-window`
+* **Old Text**: `"our 30-day refund window"`
+* **New Text**: `"our 14-day refund window"`
 * **Actions**: `[ Approve Patch ]` `[ Reject Patch ]`
 
 ### 4.5. Verification Panel
+* **Apply Button**: `Compile Approved Candidates`
 * **Verify Button (Idle)**: `Run Verification Check`
 * **Verify Button (Running)**: `Verifying candidate artifacts...`
-* **Success Banner Header**: `[✓] VERIFIED: ALL OPERATIONS ALIGNED`
-* **Success Banner Subtext**: `"0 instances of drift detected. All 5 operational files are fully aligned with Clause REFUND-01-REV (14 days)."`
+* **Success Banner Header**: `[✓] VERIFIED: ALL CANDIDATE ASSERTIONS PASSED`
+* **Success Banner Subtext**: `"0 stale target references. All 5 candidate artifacts passed the fixture assertions for clause.refund-window (14 days)."`
 * **Failure Banner Header**: `[✗] DISCREPANCY DETECTED`
-* **Failure Banner Subtext**: `"Verification failed. One or more patches have been rejected or remain pending. Operational drift risk: High."`
+* **Failure Banner Subtext**: `"Verification is blocked until every proposed patch has an explicit approval."`
 
 ### 4.6. Compilation Receipt (Modal Dialog)
 * **Modal Header**: `Compilation Receipt`
 * **Receipt ID**: `COMP-REC-2026-07-18-001`
-* **Source Version**: `REFUND-01-REV (SHA-256: 7a8b...3c9d)`
+* **Source Version**: `policy.refunds v2`; show the run-generated SHA-256 content checksum separately and label it as a checksum, never a signature.
 * **Alignment Status**: `100% VERIFIED`
 * **Files Compiled**: `5 / 5`
 * **Integrity Block**:

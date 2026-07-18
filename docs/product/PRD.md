@@ -33,8 +33,8 @@
 To maintain a dependency-light, single-application footprint (Next.js, client-side Reactivity, no database, no authentication), the P0 release is bounded to a single, high-fidelity refund-policy change cascade.
 
 ### The Policy Revision
-* **Original Policy**: "Customers may request a full refund within thirty (30) days of purchase." (Clause `REFUND-01`)
-* **Revised Policy**: "Customers may request a full refund within fourteen (14) days of purchase." (Clause `REFUND-01-REV`)
+* **Original Policy**: "Customers may request a refund within 30 days of purchase." (Clause `clause.refund-window`, version v1)
+* **Revised Policy**: "Customers may request a refund within 14 days of purchase." (Clause `clause.refund-window`, version v2)
 
 ### The 5 Curated Operational Artifacts (Dependent Corpus)
 1. **Support SOP (Standard Operating Procedure)**:
@@ -59,8 +59,8 @@ To maintain a dependency-light, single-application footprint (Next.js, client-si
 
 ### 4.1. Policy Document Comparator
 * **Requirement**: Display side-by-side (or unified diff-style) comparison of the old policy vs. the new policy.
-* **P0 Golden Path**: Highlight the exact change from `thirty (30) days` to `fourteen (14) days` in Clause `REFUND-01`.
-* **Traceability**: The UI must display the clause identifier (`REFUND-01`) clearly.
+* **P0 Golden Path**: Highlight the exact change from `30 days` to `14 days` in `clause.refund-window`.
+* **Traceability**: The UI must display `clause.refund-window` and `change.refund-window` clearly.
 
 ### 4.2. Provider Mode Selector
 * **Requirement**: Explicitly toggle between "Simulated Replay" and "Live GPT-5.6" provider modes.
@@ -73,14 +73,14 @@ To maintain a dependency-light, single-application footprint (Next.js, client-si
 * **Accessibility**: Graph-like representations must be accompanied by (or toggleable to) a structured list/table format to ensure compatibility with screen readers.
 * **Metadata**: For each of the 5 operational artifacts, show:
   * File Name and Type
-  * Location within the file (e.g., Line 45, Section 3.2)
+  * Stable target anchor (for example, `sop.step-2.eligibility`)
   * Dependency status (e.g., Unresolved, Patched, Verified)
 
 ### 4.4. Source-Linked Patch Inspector
 * **Requirement**: Present detailed patch cards showing the exact replacement to be applied.
 * **Traceability Rules**: Each patch must explicitly display:
-  * The source policy clause code (`REFUND-01`)
-  * The target file path and location (`docs/operations/sop.md#L45`)
+  * The source change ID (`change.refund-window`) and clause ID (`clause.refund-window`)
+  * The target artifact and stable anchor (`artifact.support-sop / sop.step-2.eligibility`)
   * A side-by-side diff showing the old text (red background, strike-out) vs. the proposed text (green background).
 
 ### 4.5. Human Approval Gate

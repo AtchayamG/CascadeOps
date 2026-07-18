@@ -1,6 +1,6 @@
 # User Journeys — CascadeOps
 
-This document defines the primary user journey for **Sarah Vance, Operations Change Owner**, focusing on the 90-second judge golden path. It details the interface interactions, expected system feedback, and alternative accessibility paths.
+This document defines the primary user journey for **Sarah Vance, Operations Change Owner**, focusing on the concise judge golden path. It details the interface interactions, expected system feedback, and alternative accessibility paths.
 
 ---
 
@@ -27,10 +27,10 @@ graph TD
 * **Duration**: 0–10 seconds.
 
 #### Step 2: Policy Clause Comparison
-* **Action**: Sarah inspects the policy comparison panel. She views the old policy text side-by-side with the new policy text, paying special attention to clause `REFUND-01`.
-  * *Old (Clause REFUND-01)*: `"Customers may request a full refund within thirty (30) days of purchase."`
-  * *New (Clause REFUND-01-REV)*: `"Customers may request a full refund within fourteen (14) days of purchase."`
-* **System Feedback**: The diff highlights `thirty (30)` in red strike-through text and `fourteen (14)` in green text.
+* **Action**: Sarah inspects the policy comparison panel and the single modified clause, `clause.refund-window`.
+  * *v1*: `"Customers may request a refund within 30 days of purchase."`
+  * *v2*: `"Customers may request a refund within 14 days of purchase."`
+* **System Feedback**: The diff highlights `30 days` as removed and `14 days` as added.
 * **Duration**: 10–25 seconds.
 
 #### Step 3: Run Policy Compiler
@@ -46,35 +46,36 @@ graph TD
     3. `docs/macros/customer_decline_response.txt` (Customer-Response Template)
     4. `docs/qa/checklist.md` (QA Checklist)
     5. `docs/training/onboarding_guide.md` (Training Guide)
-* **System Feedback**: The system shows a visual network overview, accompanied by a clean, WCAG-compliant table/list view showing the artifact name, target location, and a status tag: `PENDING REVIEW (Amber)`.
+* **System Feedback**: The system shows a clean, WCAG-compliant list showing artifact name, exact target anchor, and `PROPOSED (Amber)` status.
 * **Duration**: 30–45 seconds.
 
 #### Step 5: Patch-by-Patch Code Review & Human Approval Gate
-* **Action**: Sarah clicks on each of the 5 proposed patches to inspect them. She verifies that each patch card clearly lists the source clause (`REFUND-01`) and the exact target location (e.g., `sop.md#L45`). She clicks `"Approve"` on all 5 patches.
-  * *SOP Patch*: Change "...within the 30-day window..." to "...within the 14-day window...".
-  * *Form Patch*: Change "Refunds must be requested within 30 days..." to "...within 14 days...".
-  * *Response Macro Patch*: Change "...outside our 30-day refund window..." to "...outside our 14-day refund window...".
-  * *QA Checklist Patch*: Change "...date is ≤ 30 days..." to "...date is ≤ 14 days...".
-  * *Training Guide Patch*: Change "...maintain a 30-day refund window..." to "...maintain a 14-day refund window...".
-* **System Feedback**: As Sarah clicks `"Approve"`, the amber status tag on each patch card transitions to a neutral, dark gray checked tag: `APPROVED`. The global state indicator updates to: `"All patches reviewed. Verification required."`
-* **Duration**: 45–70 seconds.
+* **Action**: Sarah inspects each of the 5 proposed patches. She verifies `change.refund-window`, `clause.refund-window`, and the exact target anchor (for example, `sop.step-2.eligibility`), then approves all 5 individually.
+  * *SOP Patch*: `purchase was made within the last 30 days` → `...14 days`.
+  * *Form Patch*: `Purchases older than 30 days are not eligible` → `...14 days...`.
+  * *Response Template Patch*: `within 30 days of your purchase` → `within 14 days...`.
+  * *QA Checklist Patch*: `confirmed purchase within 30 days` → `...14 days`.
+  * *Training Guide Patch*: `our 30-day refund window` → `our 14-day refund window`.
+* **System Feedback**: Each approved patch transitions from `PROPOSED` to `APPROVED`. The global state becomes `All five patches approved. Candidate compilation available.`
 
-#### Step 6: Operations Verification Check
-* **Action**: Sarah clicks the primary action: `"Run Verification Check"`.
-* **System Feedback**: The verification engine executes a deterministic dry run in memory. It scans the candidate text files to verify that all occurrences of the old refund window are corrected and that no 30-day references remain.
-  * Within 1 second, the global state transitions to a bold green banner: `VERIFIED: ALL OPERATIONS ALIGNED`.
+#### Step 6: Compile Approved Candidates
+* **Action**: Sarah clicks `"Compile Approved Candidates"`.
+* **System Feedback**: All five grounded patches apply atomically to isolated in-memory candidate copies; originals remain unchanged.
+
+#### Step 7: Deterministic Verification
+* **Action**: Sarah clicks `"Run Verification Check"`.
+* **System Feedback**: The verifier checks the five exact target anchors, candidate values, anchor integrity, untouched blocks, and receipt counts.
+  * The global state transitions to `VERIFIED: ALL CANDIDATE ASSERTIONS PASSED`.
   * Individual patch status tags change to `VERIFIED (Green)`.
-* **Duration**: 70–80 seconds.
 
-#### Step 7: View & Export Compilation Receipt
+#### Step 8: View & Export Compilation Receipt
 * **Action**: Sarah clicks `"Export Compilation Receipt"`.
 * **System Feedback**: A modal panel displays the deterministic receipt summary:
   * *Title*: `Compilation Receipt`
   * *Status*: `VERIFIED`
-  * *Timestamp*: `2026-07-18T22:37:00Z`
+  * *Timestamp*: Generated at run time in ISO 8601 format.
   * *Integrity*: A SHA-256 content checksum computed from the canonical receipt JSON and explicitly labelled as not a digital signature.
   * *Action*: A button to `"Download JSON Receipt"` and a confirmation message: `"Candidate artifacts verified against the 14-day policy fixture."`
-* **Duration**: 80–90 seconds.
 
 ---
 
@@ -84,21 +85,21 @@ graph TD
 1. Sarah inspects the *Training Guide Patch* and decides the wording needs to be rewritten manually because the patch changes a header.
 2. Sarah clicks `"Reject"` on the Training Guide Patch card.
 3. **System Feedback**: The card status transitions to `REJECTED (Amber/Red)`. The global banner informs the user: `"Compilation Blocked: One or more patches rejected."`
-4. Sarah attempts to click `"Run Verification Check"`.
-5. **System Feedback**: The button is disabled (or if clicked, fails immediately), displaying an inline warning: `"Verification cannot run while rejected patches exist."`
+4. Sarah attempts to click `"Compile Approved Candidates"`.
+5. **System Feedback**: The action is disabled (or fails closed with `CO-STATE-002`), with no candidate changes and no receipt.
 6. **Recovery**: Sarah changes the decision to `"Approve"` once she is satisfied, unlocking the compiler.
 
 ### Journey B: Screen Reader Access (High Contrast / Linear Flow)
 1. A blind operations reviewer accesses CascadeOps using a screen reader (NVDA or VoiceOver).
 2. The user navigates via keyboard `Tab` to the **Impact Cascade** section.
 3. Instead of parsing a complex spatial canvas, the screen reader reads a semantic HTML table: *"Table: Impact Cascade. 5 rows, 3 columns. Column 1: Artifact, Column 2: Target Location, Column 3: Review Status."*
-4. The user navigates through rows: *"Row 2: Support SOP, Section 3.2, Status: Pending Review."*
+4. The user navigates through rows: *"Support SOP, sop.step-2.eligibility, status Proposed."*
 5. The user hits `Enter` on a patch row to open the details drawer, tabs to the `"Approve"` button, and presses `Space` to confirm.
 
 ### Journey C: Live GPT-5.6 Execution Error (Graceful Degradation)
 1. Sarah toggles the mode switch to **Live GPT-5.6** and clicks `"Compile Policy Change"`.
 2. The server-side API call encounters a network failure or rate limit.
 3. **System Feedback**: The spinner stops. An inline, high-contrast alert box (Red boundary) appears:
-   * *Heading*: `API Connection Error (Code: CL-429)`
+   * *Heading*: `Live provider unavailable (CO-PROV-001)`
    * *Body*: `"The compiler was unable to establish a secure connection to the GPT-5.6 Responses engine. Please check your network environment or fall back to Simulated Replay mode."`
    * *Traceability*: The session remains safe; no partial or broken patches are forced into the workspace.

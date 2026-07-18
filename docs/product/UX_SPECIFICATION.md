@@ -43,16 +43,16 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
 +-----------------------------------------------------------------------------------+
 |  COLUMN 1: POLICY COMPARATOR      |  COLUMN 2: COMPILATION WORKSPACE              |
 |                                   |                                               |
-|  Original Policy (Clause REFUND-01)|  [Primary Action: Compile Policy Change]      |
-|  "Customers may request refunds   |                                               |
-|  within thirty (30) days..."      |  Impact Cascade (5 Dependent Files Found)      |
+|  Original Policy (clause.refund-window v1)| [Primary Action: Compile Policy Change] |
+|  "Customers may request a refund  |                                               |
+|  within 30 days..."               |  Impact Cascade (5 affected artifacts)          |
 |                                   |  +-----------------------------------------+  |
-|  Revised Policy (REFUND-01-REV)   |  | sop.md#L45                  [PENDING]   |  |
-|  "Customers may request refunds   |  | [- thirty (30) -] [+ fourteen (14) +]    |  |
-|  within fourteen (14) days..."    |  | [Approve]  [Reject]                      |  |
+|  Revised Policy (clause.refund-window v2)| `sop.step-2.eligibility` [PROPOSED] |
+|  "Customers may request a refund  |  | [- 30 days -] [+ 14 days +]              |  |
+|  within 14 days..."               |  | [Approve]  [Reject]                      |  |
 |                                   |  +-----------------------------------------+  |
 |                                   |                                               |
-|                                   |  [Verify Operations] [Export Receipt (Disabled)]|
+|                                   |  [Compile Candidates] [Verify] [Export Disabled]|
 +-----------------------------------------------------------------------------------+
 |  Disclaimer: Management and documentation alignment aid. Not legal certification. |
 +-----------------------------------------------------------------------------------+
@@ -69,7 +69,7 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
 
 ### 2.2. Column 1: Policy Comparator (Left Panel)
 * Displays the source document revision side-by-side or top-to-bottom.
-* Clearly highlights the change clause (`REFUND-01`) using diff styling (red deletion, green insertion).
+* Clearly highlights `clause.refund-window` and `change.refund-window` using diff styling (red deletion, green insertion).
 * Left panel remains locked/read-only during compilation, serving as the source of truth.
 
 ### 2.3. Column 2: Compilation Workspace (Right Panel)
@@ -77,7 +77,8 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
 * Layout transitions through three distinct phases:
   1. **Pre-compile**: Prompt to click `"Compile Policy Change"`. Impact list is empty/hidden.
   2. **Active Review**: Displays the 5 proposed patch cards. A progress counter shows `X / 5 Approved`.
-  3. **Verification**: After reviews, displays the `"Run Verification Check"` button. If successful, transitions to the green verified banner and unlocks `"Export Compilation Receipt"`.
+  3. **Candidate compile**: After all five approvals, enables `"Compile Approved Candidates"`; all five patches apply atomically to isolated copies.
+  4. **Verification**: After candidate compilation, enables `"Run Verification Check"`. Success unlocks `"Export Compilation Receipt"`.
 
 ---
 
@@ -132,7 +133,9 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
   * Label: `[✗] Rejected` in red text.
 * **State 4: Verified (Green)**:
   * Border: `1px solid #15803D`.
-  * Label: `[✓] Verified Alignment` in green text.
+  * Label: `[✓] Verified` in green text.
+
+An intermediate `APPLIED` state indicates that the isolated candidate copy contains the approved patch but has not yet passed verification.
 
 ### 4.3. Simulation/Replay Banner
 * **Simulated Replay (Active)**:
@@ -153,7 +156,7 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
 
 ### 5.2. Verification Sequence
 * Triggered by clicking `"Run Verification Check"`.
-* Visual: A linear progress bar fills from left to right over 800ms.
+* Visual: A brief progress status reflects real deterministic phases; no artificial delay is required.
 * Output transitions:
   * If successful: Transforms into a green success banner with a tick mark. The receipt download button becomes available without sound or attention-grabbing motion.
   * If failed (e.g. some patches rejected): Banner turns red, listing the outstanding conflicts.
@@ -165,13 +168,14 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
 To ensure standard-compliant keyboard navigation:
 
 1. **Header Toggle**: Focuses the Mode Switcher (`Simulated Replay` vs. `Live`).
-2. **Left Panel: Policy Clause**: Tab focus highlights the interactive Clause link `REFUND-01` to show metadata.
+2. **Policy Clause**: Tab focus highlights `clause.refund-window` to show source metadata.
 3. **Primary Action**: Tab focus highlights `"Compile Policy Change"` button.
 4. **Patch Review (Loop)**:
    * First patch card: Focuses card link.
    * First patch: Focuses `"Approve"` button.
    * First patch: Focuses `"Reject"` button.
    * (Repeated for patches 2, 3, 4, and 5).
-5. **Verification Action**: Focuses `"Run Verification Check"` button.
+5. **Candidate Compile Action**: Focuses `"Compile Approved Candidates"` after all five approvals.
+6. **Verification Action**: Focuses `"Run Verification Check"` after candidate compilation.
 6. **Export Action**: Focuses `"Export Compilation Receipt"` button.
 7. **Footer**: Focuses disclaimer links.
