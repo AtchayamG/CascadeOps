@@ -3,14 +3,14 @@ import { z } from "zod";
 import { ApprovalDecisionSchema, ImpactFindingSchema, PatchProposalSchema, CompilerFailure } from "@/lib/contracts";
 import { LiveProvider, getOpenAIClient } from "@/lib/live-provider";
 import { ReplayProvider } from "@/lib/replay-provider";
-import { analyzePolicy, completeCompilation } from "@/lib/workflow";
+import { analyzePolicy, compileCandidates, completeCompilation } from "@/lib/workflow";
 
 export const runtime = "nodejs";
 
 const RequestSchema = z.discriminatedUnion("action", [
   z.strictObject({ action: z.literal("analyze"), mode: z.enum(["replay", "live"]) }),
   z.strictObject({
-    action: z.literal("complete"),
+    action: z.enum(["apply", "verify", "complete"]),
     mode: z.enum(["replay", "live"]),
     impacts: z.array(ImpactFindingSchema),
     patches: z.array(PatchProposalSchema),
@@ -24,6 +24,9 @@ export async function POST(request: Request) {
     if (body.action === "analyze") {
       const provider = body.mode === "replay" ? new ReplayProvider() : new LiveProvider(getOpenAIClient());
       return NextResponse.json({ ok: true, data: await analyzePolicy(provider) });
+    }
+    if (body.action === "apply") {
+      return NextResponse.json({ ok: true, data: compileCandidates(body) });
     }
     return NextResponse.json({ ok: true, data: completeCompilation(body) });
   } catch (error) {

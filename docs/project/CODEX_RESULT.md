@@ -2,7 +2,7 @@
 
 ## Status
 
-IN PROGRESS — M1-M3 implementation.
+IN PROGRESS - verified local product; publication and submission remain.
 
 ## Verified
 
@@ -10,20 +10,22 @@ IN PROGRESS — M1-M3 implementation.
 - Clean CascadeOps repository initialized during the submission period.
 - Product identity, category, P0 workflow, and five-artifact contract frozen.
 - Official rules, deadline, submission chain, and judging criteria rechecked on July 18, 2026.
-- M0 blueprint, product, UX, architecture, security, testing, evaluation, and submission documents reconciled.
-- Shared Next.js foundation passes lint, strict typecheck, and production build.
-- Claude Fable and agy worker routing is available in isolated worktrees.
+- Blueprint, UX, architecture, security, testing, evaluation, and submission planning are complete.
+- Strict contracts, fixture providers, compiler, API, UI, human decision gate, isolated candidate compilation, deterministic verification, and receipt export are integrated.
+- Replay is visibly simulated and deterministic.
+- Live mode uses GPT-5.6 Responses Structured Outputs, `store: false`, and fails closed without silent fallback; a bounded live smoke proof passed.
+- Local verification: 22 tests, lint, strict typecheck, production build, and desktop/mobile Playwright flows with axe accessibility checks all pass.
+- Production visual QA confirms readable responsive cards and contained long IDs/checksums.
 
 ## Not yet verified
 
-- Integrated compiler/UI and full test suite
-- Live GPT-5.6 receipt
-- Public repository or deployment
-- Demo video, creator captions, or thumbnail
-- Devpost draft or submitted entry
+- Public repository and clean-clone check
+- Public deployment
+- Public demo video, creator captions, and thumbnail
+- Submitted Devpost entry
 
 ## Primary Codex task
 
 Thread/session identifier: `019f5282-7c6f-76d1-888e-ffb0c25de3c8`.
 
-This identifier is recorded for continuity but the final submission evidence must use the required `/feedback` flow.
+This identifier is recorded for continuity; the final submission evidence must use the required `/feedback` flow.

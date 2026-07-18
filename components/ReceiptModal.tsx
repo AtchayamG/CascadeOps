@@ -99,7 +99,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             ref={closeBtnRef}
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 bg-transparent border-none text-xl p-1 leading-none font-bold"
+            className="text-gray-600 hover:text-gray-700 bg-transparent border-none text-xl p-1 leading-none font-bold"
             aria-label="Close Receipt"
           >
             &times;
@@ -121,7 +121,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           )}
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded border text-sm" style={{ borderColor: "var(--border-neutral)" }}>
+          <div
+            className="grid bg-gray-50 p-4 rounded border text-sm"
+            style={{
+              borderColor: "var(--border-neutral)",
+              display: "grid",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: "1rem",
+            }}
+          >
             <div>
               <p className="text-xs text-gray-500 font-mono">Receipt ID:</p>
               <button
@@ -134,8 +142,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </button>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-mono">Alignment Status:</p>
-              <p className="font-bold text-green-700 font-mono">100% VERIFIED</p>
+              <p className="text-xs text-gray-500 font-mono">Candidate Status:</p>
+              <p className="font-bold text-green-700 font-mono">5 / 5 VERIFIED</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-mono">Source Version:</p>
@@ -144,7 +152,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-mono">Files Compiled:</p>
+              <p className="text-xs text-gray-500 font-mono">Artifacts Compiled:</p>
               <p className="font-semibold text-gray-800 font-mono">
                 {receipt.patchSummary.applied} / {receipt.patchSummary.proposed}
               </p>
@@ -156,20 +164,27 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             <p className="font-bold text-gray-700 border-b pb-1" style={{ borderColor: "var(--border-neutral)" }}>
               Integrity Block Details
             </p>
-            <div className="grid grid-cols-3 gap-1">
+            <div
+              className="grid gap-2"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(6rem, auto) minmax(0, 1fr)",
+              }}
+            >
               <span className="text-gray-500">Compiler:</span>
-              <span className="col-span-2">
+              <span>
                 CascadeOps v0.1 — {receipt.mode === "replay" ? "Simulated Replay" : "Live GPT-5.6"}
               </span>
 
               <span className="text-gray-500">Digest Type:</span>
-              <span className="col-span-2">SHA-256 content checksum (not a digital signature)</span>
+              <span>SHA-256 content checksum (not a digital signature)</span>
 
               <span className="text-gray-500 text-[10px] md:text-xs">Digest Hash:</span>
               <button
                 type="button"
                 onClick={() => handleCopy(receipt.contentHash, "Digest Hash")}
-                className="col-span-2 text-[10px] md:text-xs text-left break-all text-gray-700 font-semibold selection:bg-teal-100 bg-transparent border-none p-0 cursor-pointer hover:underline"
+                className="text-[10px] md:text-xs text-left break-all text-gray-700 font-semibold selection:bg-teal-100 bg-transparent border-none p-0 cursor-pointer hover:underline"
+                style={{ overflowWrap: "anywhere" }}
                 title="Click to copy Digest Hash"
               >
                 {receipt.contentHash}

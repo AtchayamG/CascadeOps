@@ -15,7 +15,6 @@ const COMPILE_STEPS = [
 interface WorkspacePanelProps {
   mode: "replay" | "live";
   runState: string;
-  setRunState: (state: string) => void;
   impacts: ImpactFinding[];
   patches: PatchProposal[];
   setPatches: (patches: PatchProposal[]) => void;
@@ -23,15 +22,14 @@ interface WorkspacePanelProps {
   isCompiling: boolean;
   onCompile: () => Promise<void>;
   onApply: () => Promise<void>;
+  onVerify: () => Promise<VerificationAssertion[] | null>;
   isApplying: boolean;
-  serverAssertions: VerificationAssertion[];
   onOpenReceipt: () => void;
 }
 
 export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   mode,
   runState,
-  setRunState,
   impacts,
   patches,
   setPatches,
@@ -39,8 +37,8 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   isCompiling,
   onCompile,
   onApply,
+  onVerify,
   isApplying,
-  serverAssertions,
   onOpenReceipt,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
@@ -114,7 +112,9 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   };
 
   // Helper to count patch states
-  const approvedCount = patches.filter((p) => p.status === "approved").length;
+  const approvedCount = patches.filter((p) =>
+    ["approved", "applied", "verified"].includes(p.status),
+  ).length;
   const totalCount = patches.length;
 
   // Apply handler
@@ -137,8 +137,8 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
 
     if (rejectedPatches.length > 0) {
       setError({
-        code: "CO-STATE-003",
-        message: `Attempt to apply/export a rejected patch. ${rejectedPatches.length} patch(es) have been explicitly rejected.`,
+        code: "CO-STATE-002",
+        message: `Candidate compilation requires approval for every target. ${rejectedPatches.length} patch(es) are rejected.`,
         subjectId: rejectedPatches[0].id,
         fatal: false,
       });
@@ -150,20 +150,18 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   };
 
   // Run verification handler
-  const handleVerify = () => {
+  const handleVerify = async () => {
     setIsVerifying(true);
     setLiveMessage("Running verification check...");
-
-    setTimeout(() => {
+    const assertions = await onVerify();
+    if (assertions) {
       setVerificationResult({
-        assertions: serverAssertions,
-        passed: serverAssertions.every((a) => a.passed),
+        assertions,
+        passed: assertions.every((a) => a.passed),
       });
-      setRunState("VERIFIED");
-      setPatches(patches.map((p) => ({ ...p, status: "verified" })));
-      setLiveMessage("Verification passed: all operations aligned.");
-      setIsVerifying(false);
-    }, 800);
+      setLiveMessage("Verification passed: all candidate artifact assertions passed.");
+    }
+    setIsVerifying(false);
   };
 
   // Inline diff markup helper
@@ -319,7 +317,9 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
               const isPending = patch.status === "proposed";
               const isApproved = patch.status === "approved";
               const isRejected = patch.status === "rejected";
-              const isAppliedOrVerified = ["applied", "verified"].includes(patch.status);
+              const isApplied = patch.status === "applied";
+              const isVerified = patch.status === "verified";
+              const isFinalized = isApplied || isVerified;
 
               let borderColor = "var(--border-neutral)";
               let borderLeftColor = "transparent";
@@ -342,9 +342,14 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                 badgeText = "[✗] Rejected";
                 badgeColor = "var(--state-red)";
                 badgeBg = "var(--bg-red)";
-              } else if (isAppliedOrVerified) {
+              } else if (isApplied) {
+                borderColor = "var(--trace-blue)";
+                badgeText = "[✓] Candidate Compiled";
+                badgeColor = "var(--trace-blue)";
+                badgeBg = "var(--bg-surface)";
+              } else if (isVerified) {
                 borderColor = "var(--state-green)";
-                badgeText = "[✓] Applied & Verified";
+                badgeText = "[✓] Verified";
                 badgeColor = "var(--state-green)";
                 badgeBg = "var(--bg-green)";
               }
@@ -355,8 +360,8 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                   className="rounded-md border p-4 transition-all duration-150 relative list-none"
                   style={{
                     borderColor,
-                    borderLeft: borderLeftColor !== "transparent" ? `4px solid ${borderLeftColor}` : undefined,
-                    backgroundColor: isAppliedOrVerified ? "var(--bg-green)" : "white",
+                    boxShadow: borderLeftColor !== "transparent" ? `inset 4px 0 0 ${borderLeftColor}` : undefined,
+                    backgroundColor: isVerified ? "var(--bg-green)" : "white",
                   }}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -376,7 +381,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                         >
                           {patch.location.anchorId}
                         </button>
-                        <span className="text-[10px] text-gray-400 font-mono hidden md:inline">
+                        <span className="text-[10px] text-gray-600 font-mono hidden md:inline">
                           (Click to copy)
                         </span>
                       </div>
@@ -407,7 +412,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                     return finding ? (
                       <div className="text-[11px] text-gray-500 mb-3 leading-normal border-l-2 pl-2 italic" style={{ borderColor: "var(--border-neutral)" }}>
                         <p>{finding.explanation}</p>
-                        <p className="mt-1 font-mono text-[9px] text-gray-400">Cited change: {patch.changeId} (Clause: clause.refund-window)</p>
+                        <p className="mt-1 font-mono text-[9px] text-gray-600">Cited change: {patch.changeId} (Clause: clause.refund-window)</p>
                       </div>
                     ) : null;
                   })()}
@@ -417,7 +422,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDecision(patch.id, "reject")}
-                      disabled={isAppliedOrVerified}
+                      disabled={isFinalized}
                       className="px-3 py-1.5 text-xs font-semibold rounded border cursor-pointer"
                       style={{
                         borderColor: isRejected ? "var(--state-red)" : "var(--border-neutral)",
@@ -431,7 +436,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDecision(patch.id, "approve")}
-                      disabled={isAppliedOrVerified}
+                      disabled={isFinalized}
                       className="px-3 py-1.5 text-xs font-semibold rounded border text-white cursor-pointer"
                       style={{
                         borderColor: isApproved ? "var(--trace-blue)" : "var(--border-neutral)",
@@ -448,7 +453,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
             })}
           </ul>
 
-          {/* Action Footer: Apply Approved Patches */}
+          {/* Action Footer: Compile Approved Candidates */}
           {runState === "PATCHES_PROPOSED" && (
             <div className="border-t pt-4 flex justify-end" style={{ borderColor: "var(--border-neutral)" }}>
               <button
@@ -461,10 +466,10 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                 {isApplying ? (
                   <>
                     <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin inline-block"></span>
-                    Applying approved patches...
+                    Compiling candidate copies...
                   </>
                 ) : (
-                  "Apply Approved Patches"
+                  "Compile Approved Candidates"
                 )}
               </button>
             </div>
@@ -506,13 +511,15 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
                 }}
               >
                 <h3 className="font-bold text-base flex items-center gap-1.5">
-                  <span aria-hidden="true">✓</span> VERIFIED: ALL OPERATIONS ALIGNED
+                  <span aria-hidden="true">✓</span> VERIFIED: ALL CANDIDATE ASSERTIONS PASSED
                 </h3>
                 <p className="mt-1 text-xs font-medium text-green-950">
-                  0 instances of drift detected. All 5 operational files are fully aligned with Clause clause.refund-window (14 days).
+                  0 stale target references. All 5 isolated candidate artifacts passed the refund-window fixture assertions.
                 </p>
                 <div className="mt-2 text-xs flex flex-col gap-1 border-t pt-2 border-green-200">
-                  <p className="font-bold text-green-800">Deterministic Assertions Passed (5/5):</p>
+                  <p className="font-bold text-green-800">
+                    Deterministic assertions passed ({verificationResult.assertions.filter((a) => a.passed).length}/{verificationResult.assertions.length}):
+                  </p>
                   <ul className="list-disc list-inside text-green-900 pl-1 p-0 flex flex-col gap-0.5">
                     {verificationResult.assertions.map((a) => (
                       <li key={a.id} className="truncate select-all break-all list-none" title={a.detail}>

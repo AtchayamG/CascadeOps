@@ -57,17 +57,24 @@ function requireCanonicalCoverage(impacts: ImpactFinding[], patches: PatchPropos
   }
 }
 
-export function completeCompilation(args: {
+export interface CompilationInput {
   mode: ProviderMode;
   impacts: ImpactFinding[];
   patches: PatchProposal[];
   decisions: ApprovalDecision[];
-}) {
+}
+
+export function compileCandidates(args: CompilationInput) {
   const changes = diffPolicies(POLICY_V1, POLICY_V2);
   const impacts = validateImpacts(args.impacts, { changes, artifacts: ARTIFACTS });
   const patches = validatePatches(args.patches, { changes, artifacts: ARTIFACTS, findings: impacts });
   requireCanonicalCoverage(impacts, patches);
-  const applied = applyPatches(ARTIFACTS, patches, args.decisions);
+  return applyPatches(ARTIFACTS, patches, args.decisions);
+}
+
+export function completeCompilation(args: CompilationInput) {
+  const changes = diffPolicies(POLICY_V1, POLICY_V2);
+  const applied = compileCandidates(args);
   const assertions = verifyCandidates(ARTIFACTS, applied.candidates, applied.patches, {
     staleValues: STALE_VALUES,
     newValues: NEW_VALUES,

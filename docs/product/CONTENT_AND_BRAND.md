@@ -116,9 +116,9 @@ This section contains the exact string constants to be rendered in the user inte
 
 ### 4.6. Compilation Receipt (Modal Dialog)
 * **Modal Header**: `Compilation Receipt`
-* **Receipt ID**: `COMP-REC-2026-07-18-001`
+* **Receipt ID**: Display the run-generated `run.<uuid>` value; never hardcode a sample as evidence.
 * **Source Version**: `policy.refunds v2`; show the run-generated SHA-256 content checksum separately and label it as a checksum, never a signature.
-* **Alignment Status**: `100% VERIFIED`
+* **Candidate Status**: `5 / 5 VERIFIED`
 * **Files Compiled**: `5 / 5`
 * **Integrity Block**:
   * `Compiler: CascadeOps v0.1 — Simulated Replay`

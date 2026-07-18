@@ -29,13 +29,16 @@ test.describe("CascadeOps UI Smoke Test", () => {
       await expect(card.locator("text=Approved")).toBeVisible();
     }
 
-    // Apply approved patches
-    const applyBtn = page.locator("button:has-text('Apply Approved Patches')");
+    // Compile approved candidate artifacts
+    const applyBtn = page.locator("button:has-text('Compile Approved Candidates')");
     await expect(applyBtn).toBeVisible();
     await applyBtn.click();
 
     // Verify applied state exactly
     await expect(page.getByText("APPLIED", { exact: true })).toBeVisible();
+    await expect(page.getByText("5 / 5 Approved", { exact: true })).toBeVisible();
+    await expect(page.getByText("Candidate Compiled", { exact: false })).toHaveCount(5);
+    await expect(page.getByText("Applied & Verified", { exact: false })).toHaveCount(0);
 
     // Run verification check
     const verifyBtn = page.locator("button:has-text('Run Verification Check')");
@@ -43,7 +46,8 @@ test.describe("CascadeOps UI Smoke Test", () => {
     await verifyBtn.click();
 
     // Verify verification passed banner
-    await expect(page.locator("text=VERIFIED: ALL OPERATIONS ALIGNED")).toBeVisible();
+    await expect(page.locator("text=VERIFIED: ALL CANDIDATE ASSERTIONS PASSED")).toBeVisible();
+    await expect(page.getByText("[✓] Verified", { exact: true })).toHaveCount(5);
 
     // Export receipt
     const exportBtn = page.locator("button:has-text('Export Compilation Receipt')");
@@ -52,12 +56,10 @@ test.describe("CascadeOps UI Smoke Test", () => {
 
     // Receipt Modal should open
     await expect(page.locator("#receipt-modal-title")).toBeVisible();
-    await expect(page.locator("text=100% VERIFIED")).toBeVisible();
+    await expect(page.locator("text=5 / 5 VERIFIED")).toBeVisible();
 
     // A11y Audit using axe
-    const results = await new AxeBuilder({ page })
-      .disableRules(["color-contrast"]) // Ignore custom design theme colors contrast
-      .analyze();
+    const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });
 });

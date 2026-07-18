@@ -69,8 +69,8 @@ export default function Home() {
   const [impacts, setImpacts] = useState<ImpactFinding[]>([]);
   const [patches, setPatches] = useState<PatchProposal[]>([]);
   const [, setCandidates] = useState<OperationalArtifact[]>(ARTIFACTS);
-  const [serverAssertions, setServerAssertions] = useState<VerificationAssertion[]>([]);
   const [receipt, setReceipt] = useState<CompilationReceipt | null>(null);
+  const [approvalDecisions, setApprovalDecisions] = useState<ApprovalDecision[]>([]);
 
   // Compilation Errors
   const [error, setError] = useState<CompilerError | null>(null);
@@ -91,7 +91,6 @@ export default function Home() {
     setImpacts([]);
     setPatches([]);
     setCandidates(ARTIFACTS);
-    setServerAssertions([]);
     setReceipt(null);
 
     try {
@@ -149,7 +148,7 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "complete",
+          action: "apply",
           mode,
           impacts,
           patches,
@@ -163,11 +162,10 @@ export default function Home() {
         return;
       }
 
-      const { candidates: compiledCandidates, assertions, receipt: compiledReceipt } = data.data;
+      const { candidates: compiledCandidates } = data.data;
       setCandidates(compiledCandidates);
       setPatches(patches.map((p) => ({ ...p, status: "applied" as const })));
-      setServerAssertions(assertions);
-      setReceipt(compiledReceipt);
+      setApprovalDecisions(decisions);
       setRunState("APPLIED");
     } catch {
       setError({
@@ -180,6 +178,35 @@ export default function Home() {
     }
   };
 
+  const handleVerify = async (): Promise<VerificationAssertion[] | null> => {
+    setError(null);
+    try {
+      const res = await fetch("/api/compile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify",
+          mode,
+          impacts,
+          patches: patches.map((patch) => ({ ...patch, status: "proposed" as const })),
+          decisions: approvalDecisions,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError(data.error || { code: "CO-VER-001", message: "Verification failed closed.", fatal: true });
+        return null;
+      }
+      setReceipt(data.data.receipt);
+      setPatches(patches.map((patch) => ({ ...patch, status: "verified" as const })));
+      setRunState("VERIFIED");
+      return data.data.assertions;
+    } catch {
+      setError({ code: "CO-VER-001", message: "Verification request failed closed.", fatal: true });
+      return null;
+    }
+  };
+
   // Toggle Mode helper
   const handleModeChange = (newMode: ProviderMode) => {
     setMode(newMode);
@@ -187,8 +214,8 @@ export default function Home() {
     setImpacts([]);
     setPatches([]);
     setCandidates(ARTIFACTS);
-    setServerAssertions([]);
     setReceipt(null);
+    setApprovalDecisions([]);
     setError(null);
   };
 
@@ -305,7 +332,6 @@ export default function Home() {
             <WorkspacePanel
               mode={mode}
               runState={runState}
-              setRunState={setRunState}
               impacts={impacts}
               patches={patches}
               setPatches={setPatches}
@@ -313,8 +339,8 @@ export default function Home() {
               isCompiling={isCompiling}
               onCompile={handleCompile}
               onApply={handleApply}
+              onVerify={handleVerify}
               isApplying={isApplying}
-              serverAssertions={serverAssertions}
               onOpenReceipt={() => setIsReceiptOpen(true)}
             />
           </div>
