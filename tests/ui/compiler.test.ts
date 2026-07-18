@@ -1,0 +1,158 @@
+import { describe, it, expect } from "vitest";
+import {
+  computePolicyDiff,
+  validateImpactFindings,
+  validatePatchProposals,
+  runVerification,
+  FIXTURE_POLICY_V1,
+  FIXTURE_POLICY_V2,
+  FIXTURE_ARTIFACTS,
+  REPLAY_IMPACT_FINDINGS,
+  REPLAY_PATCH_PROPOSALS,
+  ImpactFinding,
+  PatchProposal,
+  OperationalArtifact,
+} from "../../components/compiler";
+
+describe("CascadeOps Compiler Core", () => {
+  describe("Policy Diff", () => {
+    it("computes exactly one Clause Change for refund window", () => {
+      const changes = computePolicyDiff(FIXTURE_POLICY_V1, FIXTURE_POLICY_V2);
+      expect(changes).toHaveLength(1);
+      expect(changes[0].clauseId).toBe("clause.refund-window");
+      expect(changes[0].changeType).toBe("modified");
+      expect(changes[0].beforeText).toContain("thirty (30) days");
+      expect(changes[0].afterText).toContain("fourteen (14) days");
+    });
+  });
+
+  describe("Impact Findings Validation", () => {
+    it("passes for correct golden path findings", () => {
+      const changes = computePolicyDiff(FIXTURE_POLICY_V1, FIXTURE_POLICY_V2);
+      const errors = validateImpactFindings(REPLAY_IMPACT_FINDINGS, changes, FIXTURE_ARTIFACTS);
+      expect(errors).toHaveLength(0);
+    });
+
+    it("fails with CO-VAL-001 for unknown changeId", () => {
+      const changes = computePolicyDiff(FIXTURE_POLICY_V1, FIXTURE_POLICY_V2);
+      const badFindings: ImpactFinding[] = [
+        {
+          ...REPLAY_IMPACT_FINDINGS[0],
+          changeId: "change.non-existent",
+        },
+      ];
+      const errors = validateImpactFindings(badFindings, changes, FIXTURE_ARTIFACTS);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe("CO-VAL-001");
+    });
+
+    it("fails with CO-VAL-002 for unknown artifactId", () => {
+      const changes = computePolicyDiff(FIXTURE_POLICY_V1, FIXTURE_POLICY_V2);
+      const badFindings: ImpactFinding[] = [
+        {
+          ...REPLAY_IMPACT_FINDINGS[0],
+          location: {
+            ...REPLAY_IMPACT_FINDINGS[0].location,
+            artifactId: "artifact.non-existent",
+          },
+        },
+      ];
+      const errors = validateImpactFindings(badFindings, changes, FIXTURE_ARTIFACTS);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe("CO-VAL-002");
+    });
+
+    it("fails with CO-VAL-003 for unknown anchorId", () => {
+      const changes = computePolicyDiff(FIXTURE_POLICY_V1, FIXTURE_POLICY_V2);
+      const badFindings: ImpactFinding[] = [
+        {
+          ...REPLAY_IMPACT_FINDINGS[0],
+          location: {
+            ...REPLAY_IMPACT_FINDINGS[0].location,
+            anchorId: "sop.step-non-existent",
+          },
+        },
+      ];
+      const errors = validateImpactFindings(badFindings, changes, FIXTURE_ARTIFACTS);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe("CO-VAL-003");
+    });
+  });
+
+  describe("Patch Proposals Validation", () => {
+    it("passes for correct golden path patches", () => {
+      const errors = validatePatchProposals(REPLAY_PATCH_PROPOSALS, REPLAY_IMPACT_FINDINGS, FIXTURE_ARTIFACTS);
+      expect(errors).toHaveLength(0);
+    });
+
+    it("fails with CO-VAL-006 for beforeText mismatch", () => {
+      const badPatches: PatchProposal[] = [
+        {
+          ...REPLAY_PATCH_PROPOSALS[0],
+          beforeText: "- Verify that the order timestamp is within the 100-day window.",
+        },
+      ];
+      const errors = validatePatchProposals(badPatches, REPLAY_IMPACT_FINDINGS, FIXTURE_ARTIFACTS);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe("CO-VAL-006");
+    });
+
+    it("fails with CO-VAL-007 for duplicate patch target", () => {
+      const badPatches: PatchProposal[] = [
+        REPLAY_PATCH_PROPOSALS[0],
+        {
+          ...REPLAY_PATCH_PROPOSALS[0],
+          id: "patch.duplicate-target",
+        },
+      ];
+      const errors = validatePatchProposals(badPatches, REPLAY_IMPACT_FINDINGS, FIXTURE_ARTIFACTS);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe("CO-VAL-007");
+    });
+  });
+
+  describe("Deterministic Verification Engine", () => {
+    it("passes for correctly applied candidate artifacts", () => {
+      // Setup candidate updates
+      const updatedCandidates = FIXTURE_ARTIFACTS.map((art) => {
+        const artPatches = REPLAY_PATCH_PROPOSALS.filter((p) => p.location.artifactId === art.id);
+        if (artPatches.length === 0) return art;
+        const newBlocks = art.blocks.map((block) => {
+          const patch = artPatches.find((p) => p.location.anchorId === block.anchorId);
+          if (patch) return { ...block, text: patch.afterText };
+          return block;
+        });
+        return { ...art, blocks: newBlocks };
+      });
+
+      const result = runVerification(FIXTURE_ARTIFACTS, updatedCandidates, REPLAY_PATCH_PROPOSALS);
+      expect(result.passed).toBe(true);
+      expect(result.assertions.filter((a) => a.passed)).toHaveLength(result.assertions.length);
+    });
+
+    it("fails verification if stale value is still present", () => {
+      // Mutate a block in candidates to still contain "30 days"
+      const badCandidates = JSON.parse(JSON.stringify(FIXTURE_ARTIFACTS)) as OperationalArtifact[];
+      const step2Block = badCandidates[0].blocks.find((b) => b.anchorId === "sop.step-2.eligibility");
+      if (step2Block) {
+        step2Block.text = "- Verify that the order timestamp is within the 30-day window."; // Unmodified
+      }
+
+      const result = runVerification(FIXTURE_ARTIFACTS, badCandidates, REPLAY_PATCH_PROPOSALS);
+      expect(result.passed).toBe(false);
+      const staleAbsentAsserts = result.assertions.filter((a) => a.kind === "stale-value-absent");
+      expect(staleAbsentAsserts.some((a) => !a.passed)).toBe(true);
+    });
+
+    it("fails verification if untouched block is modified", () => {
+      const updatedCandidates = JSON.parse(JSON.stringify(FIXTURE_ARTIFACTS)) as OperationalArtifact[];
+      // Mutate step-1 which should not be touched
+      updatedCandidates[0].blocks[0].text = "Modified untouched content.";
+
+      const result = runVerification(FIXTURE_ARTIFACTS, updatedCandidates, REPLAY_PATCH_PROPOSALS);
+      expect(result.passed).toBe(false);
+      const untouchedAsserts = result.assertions.filter((a) => a.kind === "untouched-unchanged");
+      expect(untouchedAsserts.some((a) => !a.passed)).toBe(true);
+    });
+  });
+});
