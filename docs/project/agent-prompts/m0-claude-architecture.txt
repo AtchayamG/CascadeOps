@@ -1,0 +1,41 @@
+ROLE: architecture
+OBJECTIVE: Produce the complete, internally consistent M0 technical architecture pack for CascadeOps — Policy Change Compiler. This is a documentation-only task; no application code.
+WORKTREE: supplied by orchestrator
+ALLOWED FILES:
+- docs/blueprint/CASCADEOPS_MASTER_BLUEPRINT_v1.md
+- docs/architecture/SYSTEM_ARCHITECTURE.md
+- docs/architecture/DATA_CONTRACTS.md
+- docs/architecture/adr/ADR-001-single-nextjs-application.md
+- docs/architecture/adr/ADR-002-strict-policy-compilation-contract.md
+- docs/architecture/adr/ADR-003-explicit-live-and-replay-providers.md
+- docs/architecture/adr/ADR-004-human-approved-patch-state-machine.md
+- docs/architecture/adr/ADR-005-deterministic-verification-before-export.md
+- docs/security/THREAT_MODEL.md
+- docs/testing/TEST_STRATEGY.md
+- docs/evaluation/EVALUATION_PLAN.md
+- docs/project/worker-handoffs/m0-claude.md
+FORBIDDEN:
+- Any file not listed above
+- Application code, dependency installation, commits, uploads, publishing, secrets, external system writes, or claims that unbuilt capability exists
+REQUIREMENTS:
+- Read AGENTS.md, README.md, docs/project/IMPLEMENTATION_PLAN.md, docs/project/handover.md, docs/hackathon/rules-and-evidence-matrix.md, and docs/product/CONTENT_AND_BRAND.md first.
+- Follow Ponytail full discipline: one dependency-light Next.js application, no database/auth/vector store/queues/OAuth/microservices.
+- Blueprint is the single source of truth and must define product thesis, users, canonical vocabulary, exact P0 golden path, state machine, typed contracts, provider interface, validation rules, prompt boundary, provenance, security/privacy, observability, performance/cost budgets, error codes, fixtures, milestones, acceptance criteria, definition of done and explicit exclusions.
+- P0 fixture: refund window changes from 30 days to 14 days across support SOP, refund request form, customer-response template, QA checklist, and training guide.
+- Canonical typed objects must include PolicyDocument, PolicyClause, ClauseChange, OperationalArtifact, ArtifactLocation, ArtifactDependency, ImpactFinding, PatchProposal, ApprovalDecision, VerificationAssertion, CompilationReceipt, ProviderMode and typed envelopes/errors.
+- Every impact and patch must cite a changed source clause and exact target location. Reject unknown IDs, fabricated citations, ungrounded replacements, duplicate/conflicting patches and invalid state transitions.
+- Replay is deterministic and visibly simulated. Live uses GPT-5.6 Responses API Structured Outputs with store:false behind a server-only adapter. Both satisfy the same schema.
+- Approval is explicit and per patch. Rejected/unreviewed patches cannot be applied or exported as accepted. Verification runs deterministically over approved in-memory candidate artifacts before export.
+- P0 never changes external systems and never claims legal/compliance certification.
+- Architecture and ADRs must agree with the blueprint exactly.
+- Testing must include unit, contract, provider parity, state machine, prompt injection, citation integrity, approval bypass, verification, accessibility, browser, secret and repeated-demo gates.
+- Evaluation must include exact fixture expectations and measurable before/after metrics without fabricated production claims.
+- Use Mermaid diagrams where relationships materially benefit.
+TESTS:
+- git diff --check
+- Confirm every listed file exists and no unlisted file changed.
+DELIVERABLE:
+- Complete documents and docs/project/worker-handoffs/m0-claude.md using DONE / BLOCKED / RISK / NEXT plus exact verification results.
+STOP IF:
+- A requirement conflicts with AGENTS.md, requires legal certification, external writes, secrets, or scope expansion beyond P0.
+

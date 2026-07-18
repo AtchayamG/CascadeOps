@@ -1,0 +1,34 @@
+ROLE: frontend/product UX
+OBJECTIVE: Produce the complete M0 product, UX, accessibility and content specification for CascadeOps, optimized for a clear 90-second judge golden path and professional enterprise operations design. Documentation only; no application code.
+WORKTREE: supplied by orchestrator
+ALLOWED FILES:
+- docs/product/PRD.md
+- docs/product/USER_JOURNEYS.md
+- docs/product/UX_SPECIFICATION.md
+- docs/product/ACCESSIBILITY.md
+- docs/product/CONTENT_AND_BRAND.md
+- docs/submission/DEMO_STORYBOARD.md
+- docs/project/worker-handoffs/m0-agy.md
+FORBIDDEN:
+- Any file not listed above
+- Application code, dependency installation, commits, uploads, publishing, secrets, or claims that unbuilt capability exists
+REQUIREMENTS:
+- Read AGENTS.md, README.md, docs/project/IMPLEMENTATION_PLAN.md, docs/project/handover.md, docs/hackathon/rules-and-evidence-matrix.md, and the existing docs/product/CONTENT_AND_BRAND.md first.
+- Use Gemini 3.5 Flash High design judgment but keep P0 dependency-light and implementable in one Next.js app.
+- Define one role: operations change owner reviewing an approved refund-policy revision.
+- Golden demo: compare 30-day vs 14-day clause; reveal five impacted artifacts; inspect source-linked patches; approve/reject; run verification; export/view compilation receipt.
+- Design must avoid generic neon agent dashboards, excessive cards, fake activity, overflowing hashes/IDs and uneven columns.
+- Establish a professional globally legible visual direction: calm operational control, neutral warm surfaces, ink/graphite text, restrained teal or cobalt for traceability, amber only for review, red only for failed verification, green only for verified state. Meet WCAG 2.2 AA.
+- Specify information architecture, responsive layouts at 360/768/1280/1440 widths, component states, empty/loading/error/Replay/Live states, keyboard order, screen-reader semantics, reduced motion, focus, and non-colour status cues.
+- The impact cascade must remain understandable as an accessible list/table alternative to the graph.
+- Source clause and target location must be visible on each patch. Replay must be labelled Simulated. No legal/compliance claims.
+- Write exact interface copy for the golden path and a timestamped under-three-minute storyboard that visibly covers product, GPT-5.6 and Codex contribution.
+- Respect the user-authored identity exactly: CascadeOps — Policy Change Compiler; “One policy change. Every operation aligned.”
+TESTS:
+- git diff --check
+- Confirm every listed file exists and no unlisted file changed.
+DELIVERABLE:
+- Complete documents and docs/project/worker-handoffs/m0-agy.md using DONE / BLOCKED / RISK / NEXT plus exact verification results.
+STOP IF:
+- The experience requires unapproved connectors, databases, external writes, legal certification, or changes outside the allowed files.
+
