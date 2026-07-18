@@ -1,0 +1,25 @@
+You are the bounded submission-copy worker for CascadeOps. Work only in this clean Git worktree.
+
+Read these sources first:
+- docs/blueprint/CASCADEOPS_MASTER_BLUEPRINT_v1.md
+- docs/submission/SUBMISSION_EVIDENCE_PLAN.md
+- docs/submission/VIDEO_STORYBOARD.md
+- docs/testing/LIVE_GPT_5_6_SMOKE.md
+- docs/project/CODEX_RESULT.md
+- README.md
+
+Create or replace only these files under docs/submission/:
+1. DEVPOST_CONTENT.md: polished, truthful Devpost-ready title, tagline, short description, full story using problem/inspiration/how it works/how built/challenges/accomplishments/learned/next; category Work & Productivity; technologies; explicit Codex and GPT-5.6 roles; setup/judging notes; placeholders for URLs and /feedback ID.
+2. VIDEO_SCRIPT.md: an actual 2:15-2:35 narrated demo script with timestamped shots, exact UI actions, and voiceover. It must explicitly explain what Codex built and how GPT-5.6 is used. Replay must be labeled simulated; mention the bounded live proof without pretending the public demo has a key.
+3. YOUTUBE_COPY.md: public YouTube title, concise description, chapter timestamps matching the script, links as placeholders, and accurate safety/limitations wording.
+4. DEMO_CAPTIONS.srt: valid SRT captions synchronized to the VIDEO_SCRIPT voiceover, ending before 2:40.
+
+Hard truth constraints:
+- Never claim production scanning, external enterprise writes, compliance/legal certification, cryptographic signing/sealing, or eliminated drift.
+- Replay is deterministic simulated fixture data. Live mode uses GPT-5.6 Responses Structured Outputs with store:false and no silent fallback, proven only by the documented bounded local smoke test.
+- The product compiles isolated candidate artifact copies only after all five explicit approvals, then runs a separate deterministic verification action. Rejection blocks compilation/verification/export/receipt until changed.
+- The receipt checksum is SHA-256 content integrity only, not a digital signature.
+- Exact P0 is one 30-to-14-day refund-policy change across five artifacts.
+- Do not invent metrics, customers, integrations, URLs, session IDs, or quotes.
+
+Keep copy concise, professional, globally understandable, and judge-friendly. Do not edit code, README, project state, or any file outside docs/submission. Run a final rg truthfulness scan over your four files. Commit the changes on your worker branch with message: docs: draft submission narrative and demo script
