@@ -1,0 +1,20 @@
+Implement CascadeOps M1-M3 domain and API foundation in your isolated worktree. Read AGENTS.md and the complete M0 architecture pack first. The blueprint is authoritative.
+
+OWNERSHIP — EDIT ONLY
+- lib/**
+- app/api/**
+- tests/domain/**
+- tests/demo/**
+- docs/project/worker-handoffs/m1-claude.md
+
+DELIVER
+1. Strict Zod schemas and inferred TypeScript contracts for every core object and typed error/envelope.
+2. The exact deterministic fixture: policy refund window 30 -> 14 days; exactly five artifacts, anchors, impacts, and patches, one per named artifact.
+3. A deterministic Replay provider that visibly identifies itself as simulated and produces the fixture result.
+4. A fail-closed compiler/service pipeline: diff, impacts, patches, decision validation, isolated candidate apply, deterministic verification, receipt generation with SHA-256 content checksum.
+5. A server-only Live GPT-5.6 provider using the OpenAI Responses API Structured Outputs and store:false. Never expose the key, never silently fall back, and validate/ground all model output against fixture IDs and beforeText.
+6. Minimal route handlers needed by the UI, with explicit provider selection and typed errors.
+7. High-value Vitest coverage including exact five counts, citations/grounding, all-five approval success, separate rejection/bypass failure, unknown IDs, mismatched beforeText, deterministic checksum, Replay network isolation, and Live request contract with a mocked client.
+8. Demo assertions that prove the golden path ends verified with zero stale target references and five aligned artifacts.
+
+Use the shortest clear implementation. No database, auth, vector store, queue, OAuth, external enterprise writes, or speculative abstractions. Do not edit shared build configuration, app/page.tsx, CSS, or components. Run npm test, npm run typecheck, and git diff --check. Record exact commands/results in the handoff. Do not commit.

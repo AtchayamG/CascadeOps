@@ -1,0 +1,20 @@
+Implement CascadeOps M1-M4 product UI in your isolated worktree using Gemini 3.5 Flash High. Read AGENTS.md, the complete M0 product/UX pack, blueprint, and the existing lib contracts before editing.
+
+OWNERSHIP — EDIT ONLY
+- app/page.tsx
+- app/globals.css
+- components/**
+- tests/ui/**
+- docs/project/worker-handoffs/m1-agy.md
+
+DELIVER
+1. A polished responsive single-screen policy compiler for the exact five-artifact golden path.
+2. A balanced layout that remains usable at 1280x800 and 390x844. Prefer one stable vertical patch list; do not create uneven multi-column card walls.
+3. Mode control with Replay visibly labeled deterministic/simulated and Live explicitly separate. No silent fallback or fake production claim.
+4. Stepwise experience: policy change, impact cascade, source-linked patches, explicit per-patch approval, isolated candidate compilation, deterministic verification, downloadable receipt.
+5. Every impact/patch visibly exposes the source clause and exact target anchor. Make long IDs/checksums wrap or truncate-with-copy so they never overflow.
+6. Professional operations-tool visual language: restrained ink/slate surfaces, warm document tones, one distinctive teal/cyan alignment accent, semantic amber/red only for review/failure. Avoid generic purple gradients, neon agent aesthetics, glassmorphism, excessive pills, and generic dashboard card grids.
+7. Honest terminology: candidate artifact, checksum, verified assertions, simulated replay. Never say compliance certified, sealed, signed, production scanned, or drift eliminated.
+8. Keyboard/focus behavior, semantic headings/landmarks, sufficient contrast, reduced motion, accessible status text, and desktop/mobile Playwright coverage with axe.
+
+Consume existing domain/API contracts; do not duplicate compiler logic in UI. Do not edit lib, API routes, package/config files, or docs outside your handoff. Run npm run typecheck, npm run lint, and relevant Playwright tests if dependencies/browser are available; otherwise record the precise limitation. Run git diff --check. Do not commit.
