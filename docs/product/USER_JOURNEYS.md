@@ -7,7 +7,7 @@ This document defines the primary user journey for **Sarah Vance, Operations Cha
 ## 1. Golden Path: The 90-Second Policy Compilation
 
 ### Goal
-Sarah must compile, review, approve, and verify the operational transition of the company's refund window from **30 days to 14 days** across five operational documents, then export the sealed compilation receipt.
+Sarah must compile, review, approve, and verify the operational transition of the company's refund window from **30 days to 14 days** across five operational documents, then export the compilation receipt.
 
 ```mermaid
 graph TD
@@ -68,12 +68,12 @@ graph TD
 
 #### Step 7: View & Export Compilation Receipt
 * **Action**: Sarah clicks `"Export Compilation Receipt"`.
-* **System Feedback**: Amodal panel displays the cryptographic receipt summary:
+* **System Feedback**: A modal panel displays the deterministic receipt summary:
   * *Title*: `Compilation Receipt`
   * *Status*: `VERIFIED`
   * *Timestamp*: `2026-07-18T22:37:00Z`
-  * *Signatures*: Pre-compiled SHA-256 hash digests representing the compilation state.
-  * *Action*: A button to `"Download JSON Receipt"` and a confirmation message: `"Alignment sequence complete. Operational drift risk resolved."`
+  * *Integrity*: A SHA-256 content checksum computed from the canonical receipt JSON and explicitly labelled as not a digital signature.
+  * *Action*: A button to `"Download JSON Receipt"` and a confirmation message: `"Candidate artifacts verified against the 14-day policy fixture."`
 * **Duration**: 80–90 seconds.
 
 ---

@@ -7,7 +7,7 @@
 * **Tagline**: One policy change. Every operation aligned.
 * **One-Line Pitch**: CascadeOps turns an approved policy change into a traceable, reviewable, and verified patch set across every affected operational artifact.
 * **Category**: Work & Productivity
-* **Core Value Proposition**: In enterprise operations, a single corporate policy change (such as a shortened refund window) requires updating dozens of manuals, forms, templates, checklists, and guides. Doing this manually is slow, error-prone, and lacks traceability. CascadeOps automates the compile-time analysis, tracing exact policy clauses to their corresponding locations in downstream operational artifacts, proposing explicit patches, and verifying alignment before export.
+* **Core Value Proposition**: In enterprise operations, a single corporate policy change (such as a shortened refund window) requires updating many manuals, forms, templates, checklists, and guides. Doing this manually is slow, error-prone, and lacks traceability. CascadeOps performs bounded compile-time analysis: it traces exact policy clauses to curated downstream locations, proposes explicit patches, and verifies candidate alignment before export.
 * **Disclaimer**: CascadeOps is an operational alignment aid, not legal advice or compliance certification.
 
 ---
@@ -24,7 +24,7 @@
   * Tracking down every document that references a revised policy clause.
   * Explaining the source of a policy update to skeptical regional team leads.
   * Verifying that all changed documents are internally consistent.
-* **Objective for Golden Path**: Safely compile the transition of a refund window from 30 days to 14 days, review and approve proposed patches across 5 operational documents, run deterministic verification, and obtain a sealed compilation receipt.
+* **Objective for Golden Path**: Safely compile the transition of a refund window from 30 days to 14 days, review and approve proposed patches across 5 operational documents, run deterministic verification, and obtain a compilation receipt.
 
 ---
 
@@ -92,7 +92,7 @@ To maintain a dependency-light, single-application footprint (Next.js, client-si
   * Rejected patches cannot be compiled or exported.
 
 ### 4.6. Deterministic Verification Engine
-* **Requirement**: Run a verification check to ensure in-memory compliance across all approved patches.
+* **Requirement**: Run a verification check to ensure in-memory alignment across all approved patches.
 * **Feedback States**:
   * **Verified (Green)**: All 5 patches approved and internally consistent (e.g., all referencing 14 days).
   * **Unverified (Amber/Gray)**: Verification has not yet been executed, or patches are pending.
@@ -105,8 +105,8 @@ To maintain a dependency-light, single-application footprint (Next.js, client-si
   * Policy Source Version Hash
   * Approved Patches count (5/5)
   * Verification status: `SUCCESSFUL`
-  * Cryptographic signature preview (simulated SHA-256 digest)
-  * Download button for the receipt JSON/PDF.
+  * Deterministic SHA-256 content digest computed from the canonical receipt JSON; this is an integrity checksum, not a signature
+  * Download button for the receipt JSON.
 
 ---
 
@@ -115,7 +115,7 @@ To maintain a dependency-light, single-application footprint (Next.js, client-si
 ### 5.1. Safety & Grounding Boundaries
 * **Legal/Compliance Claims**: The app must not make any legal, compliance, or regulatory certification claims. A persistent footer notice must state: *"CascadeOps is a management and documentation alignment aid. It does not provide legal or compliance certification."*
 * **Connector Restraints**: No external enterprise write actions (no direct commits to GitHub, no Slack alerts, no database storage, no Confluence writes). The output is strictly exported locally to a receipt or downloaded diff.
-* **Data Privacy**: Live GPT-5.6 prompts must use `store: false` to comply with standard enterprise data privacy expectations.
+* **Data Privacy**: Live GPT-5.6 prompts must use `store: false` to disable response storage. This setting does not constitute privacy or regulatory certification.
 
 ### 5.2. Visual System and Accessibility
 * **Color System**: Strictly adhere to a calm, graphite, warm-neutral palette. No fluorescent neon agency dashboards. Colors must serve an operational purpose (Green = Verified, Amber = Review/Pending, Red = Failed Verification, Blue/Teal = Traceability).

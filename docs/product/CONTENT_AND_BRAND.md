@@ -39,7 +39,7 @@ To preserve truthfulness and maintain the product boundary, the following vocabu
   * *Alignment aid*, *Operational traceability*, *Policy compilation*, *Verification engine*.
   * *Simulated Replay* (for demo fixtures), *Live GPT-5.6* (for Responses API execution).
   * *Proposed patches*, *Human review gate*, *Deterministic verification check*.
-  * *Compilation receipt*, *Sealed receipt*.
+  * *Compilation receipt*, *Content digest*.
 
 ---
 
@@ -114,13 +114,13 @@ This section contains the exact string constants to be rendered in the user inte
 * **Failure Banner Subtext**: `"Verification failed. One or more patches have been rejected or remain pending. Operational drift risk: High."`
 
 ### 4.6. Compilation Receipt (Modal Dialog)
-* **Modal Header**: `Sealed Compilation Receipt`
+* **Modal Header**: `Compilation Receipt`
 * **Receipt ID**: `COMP-REC-2026-07-18-001`
 * **Source Version**: `REFUND-01-REV (SHA-256: 7a8b...3c9d)`
 * **Alignment Status**: `100% VERIFIED`
 * **Files Compiled**: `5 / 5`
-* **Signatures Block**:
-  * `Compiler Sign-Off: CascadeOps-Compiler-v0.1-REPLAY`
-  * `Human Reviewer: Sarah Vance (Operations Change Owner)`
+* **Integrity Block**:
+  * `Compiler: CascadeOps v0.1 — Simulated Replay`
+  * `Receipt digest: SHA-256 content checksum (not a digital signature)`
 * **Primary Export Button**: `Download JSON Receipt`
 * **Dismiss Button**: `Close Receipt`

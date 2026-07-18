@@ -65,7 +65,7 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
   * Right: Workspace context indicator: `"Project: Refund Revision"` and a secondary receipt icon button.
 * **Footer**:
   * Non-compliance legal warning: *"CascadeOps is a management and documentation alignment aid. It does not provide legal or compliance certification."*
-  * Developer signature and status indicator.
+  * Build mode and verification status indicator.
 
 ### 2.2. Column 1: Policy Comparator (Left Panel)
 * Displays the source document revision side-by-side or top-to-bottom.
@@ -106,7 +106,7 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
 * **Layout**: Split panels with maximum main container width capped at `1400px` for optimal eye-span.
 * **Component Adjustments**:
   * Left: Policy Pane (40% width).
-  * Right: Workspace Pane (60% width) displaying patch cards in a clean, multi-column grid where applicable.
+  * Right: Workspace Pane (60% width) displaying one stable vertical patch list. Do not create uneven multi-column card rows.
 
 ---
 
@@ -132,11 +132,11 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
   * Label: `[✗] Rejected` in red text.
 * **State 4: Verified (Green)**:
   * Border: `1px solid #15803D`.
-  * Label: `[✓] Verified Compliance` in green text.
+  * Label: `[✓] Verified Alignment` in green text.
 
 ### 4.3. Simulation/Replay Banner
 * **Simulated Replay (Active)**:
-  * A clear banner on top: `"Simulated Replay: Using local cached mock data for demo purposes."`
+  * A clear banner on top: `"Simulated Replay: Using a deterministic local fixture. No model call was made."`
   * Text is colored `#1C1C1A` on `#F2F1ED` with a blue info icon.
 
 ---
@@ -145,17 +145,17 @@ The interface uses a clean, two-column split-panel layout on desktop screens to 
 
 ### 5.1. Loading State (Compile Analysis)
 * Triggered by clicking `"Compile Policy Change"`.
-* Visual: The workspace area dims to `70%` opacity. A calm progress indicator displays a running task status:
-  * Phase 1: `"Scanning directories..."` (0.5s)
-  * Phase 2: `"Parsing clause alignments..."` (0.5s)
-  * Phase 3: `"Generating structural patches..."` (0.5s)
+* Visual: A calm progress indicator reports only work that actually occurs:
+  * Phase 1: `"Comparing policy clauses..."`
+  * Phase 2: `"Tracing curated dependencies..."`
+  * Phase 3: `"Validating proposed patches..."`
 * Transitions to the Impact Cascade list with a smooth fade-in animation (`duration: 200ms`).
 
 ### 5.2. Verification Sequence
 * Triggered by clicking `"Run Verification Check"`.
 * Visual: A linear progress bar fills from left to right over 800ms.
 * Output transitions:
-  * If successful: Bounces slightly, then transforms into a green success banner with a tick mark and play sound (optional). The receipt download button scales in.
+  * If successful: Transforms into a green success banner with a tick mark. The receipt download button becomes available without sound or attention-grabbing motion.
   * If failed (e.g. some patches rejected): Banner turns red, listing the outstanding conflicts.
 
 ---
