@@ -11,7 +11,12 @@ import type {
   CompilationReceipt,
   ApprovalDecision,
 } from "@/lib/contracts";
-import { POLICY_V1, POLICY_V2, ARTIFACTS } from "@/lib/fixtures";
+import { POLICY_V1, POLICY_V2, ARTIFACTS, EXPECTED_IMPACTS, EXPECTED_PATCHES } from "@/lib/fixtures";
+import {
+  buildReplayReceipt,
+  compileReplayCandidates,
+  verifyReplayCandidates,
+} from "@/lib/replay-client";
 import { PolicyPanel } from "@/components/PolicyPanel";
 import { WorkspacePanel } from "@/components/WorkspacePanel";
 import { ReceiptModal } from "@/components/ReceiptModal";
@@ -57,6 +62,7 @@ function computePolicyDiff(v1: typeof POLICY_V1, v2: typeof POLICY_V2) {
 }
 
 export default function Home() {
+  const isStaticReplay = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
   // Provider Mode state
   const [mode, setMode] = useState<ProviderMode>("replay");
 
@@ -68,7 +74,7 @@ export default function Home() {
   // Data state
   const [impacts, setImpacts] = useState<ImpactFinding[]>([]);
   const [patches, setPatches] = useState<PatchProposal[]>([]);
-  const [, setCandidates] = useState<OperationalArtifact[]>(ARTIFACTS);
+  const [candidates, setCandidates] = useState<OperationalArtifact[]>(ARTIFACTS);
   const [receipt, setReceipt] = useState<CompilationReceipt | null>(null);
   const [approvalDecisions, setApprovalDecisions] = useState<ApprovalDecision[]>([]);
 
@@ -94,6 +100,13 @@ export default function Home() {
     setReceipt(null);
 
     try {
+      if (mode === "replay") {
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        setImpacts(structuredClone(EXPECTED_IMPACTS));
+        setPatches(structuredClone(EXPECTED_PATCHES));
+        setRunState("PATCHES_PROPOSED");
+        return;
+      }
       const res = await fetch("/api/compile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,6 +157,14 @@ export default function Home() {
     }));
 
     try {
+      if (mode === "replay") {
+        const compiledCandidates = compileReplayCandidates(patches, decisions);
+        setCandidates(compiledCandidates);
+        setPatches(patches.map((patch) => ({ ...patch, status: "applied" as const })));
+        setApprovalDecisions(decisions);
+        setRunState("APPLIED");
+        return;
+      }
       const res = await fetch("/api/compile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -181,6 +202,20 @@ export default function Home() {
   const handleVerify = async (): Promise<VerificationAssertion[] | null> => {
     setError(null);
     try {
+      if (mode === "replay") {
+        const proposedPatches = patches.map((patch) => ({ ...patch, status: "proposed" as const }));
+        const assertions = verifyReplayCandidates(candidates, proposedPatches);
+        const replayReceipt = await buildReplayReceipt(
+          candidates,
+          proposedPatches,
+          approvalDecisions,
+          assertions,
+        );
+        setReceipt(replayReceipt);
+        setPatches(patches.map((patch) => ({ ...patch, status: "verified" as const })));
+        setRunState("VERIFIED");
+        return assertions;
+      }
       const res = await fetch("/api/compile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -247,6 +282,8 @@ export default function Home() {
             <button
               type="button"
               onClick={() => handleModeChange("live")}
+              disabled={isStaticReplay}
+              title={isStaticReplay ? "Live GPT-5.6 is available in the local server build." : undefined}
               className={`switch-btn ${mode === "live" ? "active" : ""}`}
               aria-pressed={mode === "live"}
             >
