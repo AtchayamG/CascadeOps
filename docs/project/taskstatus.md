@@ -2,29 +2,28 @@
 
 ## Active milestone
 
-M0 — Pre-production architecture pack.
+M1-M3 — contracts, providers, compiler, UI, and golden Replay path.
 
 ## DONE
 
-- Product identity and Work & Productivity category selected by the user.
-- Individual entrant eligibility for India, age of majority, conflicts and official rules confirmed by the user.
-- E2E goal created and autonomous execution authorized through verified submission.
-- Clean repository and purpose-based documentation structure initialized.
-- Project constitution, status ledger, README, license and secret-safe ignore rules created.
+- User-approved product identity, Work & Productivity category, eligibility confirmation, and autonomous E2E goal.
+- Clean repository and purpose-based documentation structure.
+- M0 blueprint, product, UX, accessibility, architecture, ADR, security, testing, evaluation, and submission packs reconciled.
+- P0 frozen at exactly five artifacts, impacts, and patches; golden path approves all five.
+- Rejection blocks apply, verification, export, and receipt until the human changes the decision.
+- Minimal Next.js foundation passes lint, strict typecheck, and production build.
 
 ## BLOCKED
 
-- None for M0.
+- None.
 
 ## RISK
 
-- Submission deadline is July 21, 2026 at 5:00 PM PT; P0 scope must remain narrow.
-- The event gallery is unpublished, so direct collision analysis remains incomplete.
-- Live GPT-5.6, public repository, deployment, video and submission are not yet evidence-backed.
+- Submission deadline is July 21, 2026 at 5:00 PM PT; P0 remains intentionally narrow.
+- Live GPT-5.6, public delivery, video, and Devpost submission remain evidence gates, not claims.
 
 ## NEXT
 
-1. Complete and reconcile the blueprint, architecture, product, UX, security, evaluation, testing and submission documents.
-2. Freeze the P0 contracts and deterministic refund-policy fixture.
-3. Begin application foundation only after the M0 consistency gate passes.
-
+1. Implement and integrate strict contracts, fixture, Replay/Live providers, compiler, UI, and tests.
+2. Reproduce all worker verification on main.
+3. Run one bounded GPT-5.6 smoke proof only after deterministic gates pass.

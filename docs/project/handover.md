@@ -2,7 +2,7 @@
 
 ## Current state
 
-The repository is in M0 pre-production. No product code exists and no public artifact is claimed.
+M0 is complete and reconciled. The shared Next.js foundation passes lint, strict typecheck, and production build. Domain/compiler and UI implementation are next.
 
 ## Canonical product
 
@@ -10,17 +10,18 @@ The repository is in M0 pre-production. No product code exists and no public art
 - Full title: CascadeOps — Policy Change Compiler
 - Tagline: One policy change. Every operation aligned.
 - Category: Work & Productivity
-- P0 fixture: refund window changes from 30 days to 14 days and cascades across five dependent operational artifacts.
+- P0 fixture: refund window changes from 30 days to 14 days across exactly five dependent operational artifacts.
 
 ## Non-negotiable invariants
 
-- Every impact and patch cites the changed policy clause and exact target artifact location.
-- Unknown artifacts, invalid citations, unsupported replacements and incomplete verification fail closed.
-- Replay is deterministic and visibly simulated; Live is visibly GPT-5.6-backed.
-- Human approval is required before an artifact is marked accepted or exported.
-- No external enterprise writes, compliance certification, database, auth, vector store or OAuth in P0.
+- Exactly five impacts and five patches, one per artifact.
+- Every impact and patch cites the changed policy clause and exact target location.
+- Unknown IDs, invalid citations, unsupported replacements, and incomplete verification fail closed.
+- Replay is deterministic and visibly simulated; Live is explicitly GPT-5.6-backed and never silently falls back.
+- Every patch needs an explicit human decision. Any rejection blocks apply, verification, export, and receipt until changed before apply.
+- Successful P0 receipt is all-five verified with zero stale target references and an SHA-256 content checksum, not a signature.
+- No external enterprise writes, compliance certification, database, auth, vector store, or OAuth in P0.
 
 ## Integration policy
 
-Claude owns blueprint/architecture/contracts; agy owns product UX/content specifications. Files must not overlap. Codex integrates and verifies every result.
-
+Claude owns contracts/compiler/API/domain tests; agy owns UI/CSS/browser tests. Codex integrates, resolves contracts, reproduces gates, and owns commits/publication.

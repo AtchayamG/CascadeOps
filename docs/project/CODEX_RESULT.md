@@ -2,29 +2,28 @@
 
 ## Status
 
-IN PROGRESS — M0 pre-production.
+IN PROGRESS — M1-M3 implementation.
 
 ## Verified
 
 - E2E goal created in the primary Codex task.
 - Clean CascadeOps repository initialized during the submission period.
-- Product identity, category and P0 workflow frozen.
-- Official rules, deadline, submission chain and judging criteria rechecked on July 18, 2026.
-- Claude, agy, Hermes and RTK CLIs discovered locally.
-- Initial repository constitution committed before delegation.
+- Product identity, category, P0 workflow, and five-artifact contract frozen.
+- Official rules, deadline, submission chain, and judging criteria rechecked on July 18, 2026.
+- M0 blueprint, product, UX, architecture, security, testing, evaluation, and submission documents reconciled.
+- Shared Next.js foundation passes lint, strict typecheck, and production build.
+- Claude Fable and agy worker routing is available in isolated worktrees.
 
 ## Not yet verified
 
-- Complete blueprint and architecture pack
-- Working application or tests
+- Integrated compiler/UI and full test suite
 - Live GPT-5.6 receipt
 - Public repository or deployment
-- Demo video, captions or thumbnail
+- Demo video, creator captions, or thumbnail
 - Devpost draft or submitted entry
 
 ## Primary Codex task
 
 Thread/session identifier: `019f5282-7c6f-76d1-888e-ffb0c25de3c8`.
 
-This identifier is recorded for continuity but must be obtained through the required `/feedback` submission flow before it is entered as final evidence.
-
+This identifier is recorded for continuity but the final submission evidence must use the required `/feedback` flow.
