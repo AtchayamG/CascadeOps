@@ -1,0 +1,21 @@
+Correct the integrated CascadeOps UI after the domain/compiler layer is present. Read AGENTS.md, the current blueprint, product/UX docs, lib/contracts.ts, lib/fixtures.ts, lib/compiler.ts, and API routes. The current main branch is authoritative.
+
+EDIT ONLY
+- app/page.tsx
+- app/globals.css
+- components/**
+- tests/ui/**
+- docs/project/worker-handoffs/m1-agy.md
+
+REQUIRED CORRECTIONS
+- Delete any duplicated UI-side compiler/domain implementation such as components/compiler.ts. Import and consume the integrated lib/API contract instead.
+- Use only canonical IDs and exact fixture text: clause.refund-window, change.refund-window, and the five blueprint anchors.
+- Render exactly five impacts/patches in one stable vertical list.
+- Preserve the explicit sequence: analyze -> five per-patch decisions -> compile all five approved candidates atomically -> deterministic verify -> receipt export.
+- Any rejection blocks candidate compilation, verification, export, and receipt; the user may change the decision before apply.
+- Replay must be visibly simulated and work without an API key. Live must be explicitly GPT-5.6, server-backed, and never silently fall back.
+- Ensure long IDs and checksums wrap/truncate-with-copy and never overflow at 1280x800 or 390x844.
+- Use the professional restrained visual system and honest candidate/checksum/assertion terminology from current docs.
+- Make the UI keyboard-operable and pass axe checks.
+
+Run typecheck, lint, relevant unit/browser tests, and git diff --check. Record exact results in the handoff. Do not commit.
