@@ -4,6 +4,7 @@ out/
 coverage/
 playwright-report/
 test-results/
+*.tsbuildinfo
 .env
 .env.*
 !.env.example
@@ -13,4 +14,3 @@ Thumbs.db
 .agent-worktrees/
 .worktrees/
 docs/project/agent-logs/
-
