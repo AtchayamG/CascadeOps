@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "private": true,
+  "overrides": {
+    "postcss": "^8.5.10"
+  },
   "engines": {
     "node": ">=22.13.0"
   },
